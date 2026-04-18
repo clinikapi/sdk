@@ -61,6 +61,16 @@ export interface Consent {
   patient?: { reference: string };
 }
 
+export interface DiagnosticReport {
+  resourceType: 'DiagnosticReport';
+  id: string;
+  status: 'registered' | 'partial' | 'preliminary' | 'final' | 'amended' | 'corrected' | 'appended' | 'cancelled' | 'entered-in-error' | 'unknown';
+  code: { coding: Array<{ system?: string; code: string; display?: string }> };
+  subject?: { reference: string };
+  issued?: string;
+  result?: Array<{ reference: string }>;
+}
+
 export interface PatientReadResponse {
   patient: Patient;
   encounters: Encounter[];
@@ -69,6 +79,7 @@ export interface PatientReadResponse {
   appointments: Appointment[];
   intakes: QuestionnaireResponse[];
   consents: Consent[];
+  labs: DiagnosticReport[];
 }
 
 export class Clinik {
@@ -159,7 +170,8 @@ export class Clinik {
         medications: [],
         appointments: [],
         intakes: [],
-        consents: []
+        consents: [],
+        labs: []
       };
 
       // 4. Intelligently map the flat FHIR bundle into categorized property arrays
@@ -189,6 +201,9 @@ export class Clinik {
               break;
             case 'Consent':
               result.consents.push(resource);
+              break;
+            case 'DiagnosticReport':
+              result.labs.push(resource);
               break;
           }
         }
@@ -312,5 +327,15 @@ export class Clinik {
     },
     read: this.createReadMethod('consents'),
     update: this.createUpdateMethod('consents')
+  };
+
+  public labs = {
+    /**
+     * Retrieves or creates diagnostic lab reports.
+     * Maps to FHIR DiagnosticReport resources.
+     */
+    create: this.createCreateMethod('labs'),
+    read: this.createReadMethod('labs'),
+    update: this.createUpdateMethod('labs')
   };
 }
