@@ -12,6 +12,7 @@ export interface Patient {
   resourceType: 'Patient';
   id: string;
   name?: Array<{ family: string; given: string[] }>;
+  telecom?: Array<{ system: string; value: string; use?: string }>;
   active?: boolean;
 }
 
