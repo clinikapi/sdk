@@ -18,13 +18,18 @@ export * from './errors';
 
 import type {
   Appointment,
+  ClinicalImpression,
+  Composition,
   Consent,
   DiagnosticReport,
+  DocumentReference,
   Encounter,
   Medication,
+  MedicationRequest,
   Observation,
   Patient,
   Practitioner,
+  PractitionerRole,
   QuestionnaireResponse,
 } from './types/resources';
 
@@ -32,8 +37,14 @@ import type {
   ApiResponse,
   AppointmentCreateRequest,
   AppointmentUpdateRequest,
+  AssessmentCreateRequest,
+  AssessmentUpdateRequest,
+  AssessmentSearchParams,
   ConsentSignRequest,
   ConsentUpdateRequest,
+  DocumentCreateRequest,
+  DocumentUpdateRequest,
+  DocumentSearchParams,
   EncounterCreateRequest,
   EncounterUpdateRequest,
   IntakeSubmitRequest,
@@ -42,6 +53,9 @@ import type {
   LabUpdateRequest,
   MedicationCreateRequest,
   MedicationUpdateRequest,
+  NoteCreateRequest,
+  NoteUpdateRequest,
+  NoteSearchParams,
   ObservationCreateRequest,
   ObservationUpdateRequest,
   PatientCreateRequest,
@@ -52,6 +66,11 @@ import type {
   PractitionerCreateRequest,
   PractitionerUpdateRequest,
   PractitionerSearchParams,
+  PractitionerRoleCreateRequest,
+  PractitionerRoleUpdateRequest,
+  PrescriptionCreateRequest,
+  PrescriptionUpdateRequest,
+  PrescriptionSearchParams,
   ReadOptions,
   ResponseMeta,
 } from './types/requests';
@@ -517,6 +536,117 @@ export class Clinik {
     },
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/labs/${this.sanitizeId(id)}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // notes (DocumentReference)
+  // -------------------------------------------------------------------------
+
+  public notes = {
+    create: async (data: NoteCreateRequest): Promise<ApiResponse<DocumentReference>> => {
+      return this.request<DocumentReference>('POST', '/v1/notes', data);
+    },
+    read: async (id: string): Promise<ApiResponse<DocumentReference>> => {
+      return this.request<DocumentReference>('GET', `/v1/notes/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: NoteUpdateRequest): Promise<ApiResponse<DocumentReference>> => {
+      return this.request<DocumentReference>('PATCH', `/v1/notes/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/notes/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: NoteSearchParams): Promise<ApiResponse<PaginatedResponse<DocumentReference>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<DocumentReference>>('GET', `/v1/notes${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // prescriptions (MedicationRequest)
+  // -------------------------------------------------------------------------
+
+  public prescriptions = {
+    create: async (data: PrescriptionCreateRequest): Promise<ApiResponse<MedicationRequest>> => {
+      return this.request<MedicationRequest>('POST', '/v1/prescriptions', data);
+    },
+    read: async (id: string): Promise<ApiResponse<MedicationRequest>> => {
+      return this.request<MedicationRequest>('GET', `/v1/prescriptions/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: PrescriptionUpdateRequest): Promise<ApiResponse<MedicationRequest>> => {
+      return this.request<MedicationRequest>('PATCH', `/v1/prescriptions/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/prescriptions/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: PrescriptionSearchParams): Promise<ApiResponse<PaginatedResponse<MedicationRequest>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<MedicationRequest>>('GET', `/v1/prescriptions${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // practitionerRoles
+  // -------------------------------------------------------------------------
+
+  public practitionerRoles = {
+    create: async (data: PractitionerRoleCreateRequest): Promise<ApiResponse<PractitionerRole>> => {
+      return this.request<PractitionerRole>('POST', '/v1/practitioner-roles', data);
+    },
+    read: async (id: string): Promise<ApiResponse<PractitionerRole>> => {
+      return this.request<PractitionerRole>('GET', `/v1/practitioner-roles/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: PractitionerRoleUpdateRequest): Promise<ApiResponse<PractitionerRole>> => {
+      return this.request<PractitionerRole>('PATCH', `/v1/practitioner-roles/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/practitioner-roles/${this.sanitizeId(id)}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // assessments (ClinicalImpression)
+  // -------------------------------------------------------------------------
+
+  public assessments = {
+    create: async (data: AssessmentCreateRequest): Promise<ApiResponse<ClinicalImpression>> => {
+      return this.request<ClinicalImpression>('POST', '/v1/assessments', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ClinicalImpression>> => {
+      return this.request<ClinicalImpression>('GET', `/v1/assessments/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: AssessmentUpdateRequest): Promise<ApiResponse<ClinicalImpression>> => {
+      return this.request<ClinicalImpression>('PATCH', `/v1/assessments/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/assessments/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: AssessmentSearchParams): Promise<ApiResponse<PaginatedResponse<ClinicalImpression>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ClinicalImpression>>('GET', `/v1/assessments${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // documents (Composition)
+  // -------------------------------------------------------------------------
+
+  public documents = {
+    create: async (data: DocumentCreateRequest): Promise<ApiResponse<Composition>> => {
+      return this.request<Composition>('POST', '/v1/documents', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Composition>> => {
+      return this.request<Composition>('GET', `/v1/documents/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: DocumentUpdateRequest): Promise<ApiResponse<Composition>> => {
+      return this.request<Composition>('PATCH', `/v1/documents/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/documents/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: DocumentSearchParams): Promise<ApiResponse<PaginatedResponse<Composition>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Composition>>('GET', `/v1/documents${qs}`);
     },
   };
 }

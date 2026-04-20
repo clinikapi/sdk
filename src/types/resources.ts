@@ -589,3 +589,301 @@ export interface Bundle<T = DomainResource> {
   link?: BundleLink[];
   entry?: BundleEntry<T>[];
 }
+
+
+// ---------------------------------------------------------------------------
+// DocumentReference (Clinical Notes)
+// @see https://www.hl7.org/fhir/R4/documentreference.html
+// ---------------------------------------------------------------------------
+
+export type DocumentReferenceStatus = 'current' | 'superseded' | 'entered-in-error';
+export type DocumentRelationshipType = 'replaces' | 'transforms' | 'signs' | 'appends';
+
+export interface DocumentReferenceContent {
+  attachment: Attachment;
+  format?: Coding;
+}
+
+export interface DocumentReferenceContext {
+  encounter?: Reference[];
+  event?: CodeableConcept[];
+  period?: Period;
+  facilityType?: CodeableConcept;
+  practiceSetting?: CodeableConcept;
+  sourcePatientInfo?: Reference;
+  related?: Reference[];
+}
+
+export interface DocumentReferenceRelatesTo {
+  code: DocumentRelationshipType;
+  target: Reference;
+}
+
+export interface DocumentReference extends DomainResource {
+  resourceType: 'DocumentReference';
+  masterIdentifier?: Identifier;
+  identifier?: Identifier[];
+  /** Required (1..1) */
+  status: DocumentReferenceStatus;
+  docStatus?: 'preliminary' | 'final' | 'amended' | 'entered-in-error';
+  type?: CodeableConcept;
+  category?: CodeableConcept[];
+  subject?: Reference;
+  date?: FhirInstant;
+  author?: Reference[];
+  authenticator?: Reference;
+  custodian?: Reference;
+  relatesTo?: DocumentReferenceRelatesTo[];
+  description?: string;
+  securityLabel?: CodeableConcept[];
+  /** Required (1..*) */
+  content: DocumentReferenceContent[];
+  context?: DocumentReferenceContext;
+}
+
+
+// ---------------------------------------------------------------------------
+// MedicationRequest (Prescriptions)
+// @see https://www.hl7.org/fhir/R4/medicationrequest.html
+// ---------------------------------------------------------------------------
+
+export type MedicationRequestStatus =
+  | 'active'
+  | 'on-hold'
+  | 'cancelled'
+  | 'completed'
+  | 'entered-in-error'
+  | 'stopped'
+  | 'draft'
+  | 'unknown';
+
+export type MedicationRequestIntent =
+  | 'proposal'
+  | 'plan'
+  | 'order'
+  | 'original-order'
+  | 'reflex-order'
+  | 'filler-order'
+  | 'instance-order'
+  | 'option';
+
+export type MedicationRequestPriority = 'routine' | 'urgent' | 'asap' | 'stat';
+
+export interface MedicationRequestDosageInstruction {
+  sequence?: number;
+  text?: string;
+  patientInstruction?: string;
+  timing?: {
+    repeat?: {
+      frequency?: number;
+      period?: number;
+      periodUnit?: 's' | 'min' | 'h' | 'd' | 'wk' | 'mo' | 'a';
+      boundsPeriod?: Period;
+    };
+    code?: CodeableConcept;
+  };
+  route?: CodeableConcept;
+  method?: CodeableConcept;
+  doseAndRate?: Array<{
+    type?: CodeableConcept;
+    doseQuantity?: Quantity;
+    doseRange?: { low?: Quantity; high?: Quantity };
+    rateQuantity?: Quantity;
+  }>;
+  maxDosePerPeriod?: Ratio;
+}
+
+export interface MedicationRequestDispenseRequest {
+  initialFill?: { quantity?: Quantity; duration?: Quantity };
+  dispenseInterval?: Quantity;
+  validityPeriod?: Period;
+  numberOfRepeatsAllowed?: number;
+  quantity?: Quantity;
+  expectedSupplyDuration?: Quantity;
+  performer?: Reference;
+}
+
+export interface MedicationRequestSubstitution {
+  allowedBoolean?: boolean;
+  allowedCodeableConcept?: CodeableConcept;
+  reason?: CodeableConcept;
+}
+
+export interface MedicationRequest extends DomainResource {
+  resourceType: 'MedicationRequest';
+  identifier?: Identifier[];
+  /** Required (1..1) */
+  status: MedicationRequestStatus;
+  statusReason?: CodeableConcept;
+  /** Required (1..1) */
+  intent: MedicationRequestIntent;
+  category?: CodeableConcept[];
+  priority?: MedicationRequestPriority;
+  doNotPerform?: boolean;
+  reportedBoolean?: boolean;
+  reportedReference?: Reference;
+  medicationCodeableConcept?: CodeableConcept;
+  medicationReference?: Reference;
+  subject: Reference;
+  encounter?: Reference;
+  supportingInformation?: Reference[];
+  authoredOn?: FhirDateTime;
+  requester?: Reference;
+  performer?: Reference;
+  performerType?: CodeableConcept;
+  recorder?: Reference;
+  reasonCode?: CodeableConcept[];
+  reasonReference?: Reference[];
+  basedOn?: Reference[];
+  groupIdentifier?: Identifier;
+  courseOfTherapyType?: CodeableConcept;
+  insurance?: Reference[];
+  note?: Annotation[];
+  dosageInstruction?: MedicationRequestDosageInstruction[];
+  dispenseRequest?: MedicationRequestDispenseRequest;
+  substitution?: MedicationRequestSubstitution;
+  priorPrescription?: Reference;
+}
+
+
+// ---------------------------------------------------------------------------
+// PractitionerRole  (STU)
+// @see https://www.hl7.org/fhir/R4/practitionerrole.html
+// ---------------------------------------------------------------------------
+
+export interface PractitionerRoleAvailableTime {
+  daysOfWeek?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
+  allDay?: boolean;
+  availableStartTime?: string;
+  availableEndTime?: string;
+}
+
+export interface PractitionerRoleNotAvailable {
+  description: string;
+  during?: Period;
+}
+
+export interface PractitionerRole extends DomainResource {
+  resourceType: 'PractitionerRole';
+  identifier?: Identifier[];
+  active?: boolean;
+  period?: Period;
+  practitioner?: Reference;
+  organization?: Reference;
+  code?: CodeableConcept[];
+  specialty?: CodeableConcept[];
+  location?: Reference[];
+  healthcareService?: Reference[];
+  telecom?: ContactPoint[];
+  availableTime?: PractitionerRoleAvailableTime[];
+  notAvailable?: PractitionerRoleNotAvailable[];
+  availabilityExceptions?: string;
+  endpoint?: Reference[];
+}
+
+// ---------------------------------------------------------------------------
+// ClinicalImpression (Assessments)
+// @see https://www.hl7.org/fhir/R4/clinicalimpression.html
+// ---------------------------------------------------------------------------
+
+export type ClinicalImpressionStatus = 'in-progress' | 'completed' | 'entered-in-error';
+
+export interface ClinicalImpressionFinding {
+  itemCodeableConcept?: CodeableConcept;
+  itemReference?: Reference;
+  basis?: string;
+}
+
+export interface ClinicalImpressionInvestigation {
+  code: CodeableConcept;
+  item?: Reference[];
+}
+
+export interface ClinicalImpression extends DomainResource {
+  resourceType: 'ClinicalImpression';
+  identifier?: Identifier[];
+  /** Required (1..1) */
+  status: ClinicalImpressionStatus;
+  statusReason?: CodeableConcept;
+  code?: CodeableConcept;
+  description?: string;
+  /** Required (1..1) */
+  subject: Reference;
+  encounter?: Reference;
+  effectiveDateTime?: FhirDateTime;
+  effectivePeriod?: Period;
+  date?: FhirDateTime;
+  assessor?: Reference;
+  previous?: Reference;
+  problem?: Reference[];
+  investigation?: ClinicalImpressionInvestigation[];
+  protocol?: FhirUri[];
+  summary?: string;
+  finding?: ClinicalImpressionFinding[];
+  prognosisCodeableConcept?: CodeableConcept[];
+  prognosisReference?: Reference[];
+  supportingInfo?: Reference[];
+  note?: Annotation[];
+}
+
+// ---------------------------------------------------------------------------
+// Composition (Documents)
+// @see https://www.hl7.org/fhir/R4/composition.html
+// ---------------------------------------------------------------------------
+
+export type CompositionStatus = 'preliminary' | 'final' | 'amended' | 'entered-in-error';
+
+export interface CompositionAttester {
+  mode: 'personal' | 'professional' | 'legal' | 'official';
+  time?: FhirDateTime;
+  party?: Reference;
+}
+
+export interface CompositionRelatesTo {
+  code: 'replaces' | 'transforms' | 'signs' | 'appends';
+  targetIdentifier?: Identifier;
+  targetReference?: Reference;
+}
+
+export interface CompositionEvent {
+  code?: CodeableConcept[];
+  period?: Period;
+  detail?: Reference[];
+}
+
+export interface CompositionSection {
+  title?: string;
+  code?: CodeableConcept;
+  author?: Reference[];
+  focus?: Reference;
+  text?: Narrative;
+  mode?: 'working' | 'snapshot' | 'changes';
+  orderedBy?: CodeableConcept;
+  entry?: Reference[];
+  emptyReason?: CodeableConcept;
+  section?: CompositionSection[];
+}
+
+export interface Composition extends DomainResource {
+  resourceType: 'Composition';
+  identifier?: Identifier;
+  /** Required (1..1) */
+  status: CompositionStatus;
+  /** Required (1..1) */
+  type: CodeableConcept;
+  category?: CodeableConcept[];
+  subject?: Reference;
+  encounter?: Reference;
+  /** Required (1..1) */
+  date: FhirDateTime;
+  /** Required (1..*) */
+  author: Reference[];
+  /** Required (1..1) */
+  title: string;
+  confidentiality?: FhirCode;
+  attester?: CompositionAttester[];
+  custodian?: Reference;
+  relatesTo?: CompositionRelatesTo[];
+  event?: CompositionEvent[];
+  section?: CompositionSection[];
+}

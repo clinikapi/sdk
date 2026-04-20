@@ -142,30 +142,69 @@ export interface PatientReadResponse {
 // Practitioner
 // ---------------------------------------------------------------------------
 
+export interface PractitionerQualificationInput {
+  /** Qualification name (e.g. "MD", "Board Certified - Internal Medicine") */
+  name: string;
+  /** Issuing organization (e.g. "American Board of Internal Medicine") */
+  issuer?: string;
+  /** Period of validity */
+  period?: { start?: string; end?: string };
+  /** License/certification number */
+  identifier?: string;
+}
+
 export interface PractitionerCreateRequest {
   firstName: string;
   lastName: string;
+  prefix?: string[];
+  suffix?: string[];
   email?: string;
   phone?: string;
   gender?: 'male' | 'female' | 'other' | 'unknown';
-  npi?: string; // National Provider Identifier
+  birthDate?: string;
+  /** National Provider Identifier (US) */
+  npi?: string;
+  /** Primary specialty (e.g. "Cardiology", "Family Medicine") */
   specialty?: string;
-  qualification?: string;
+  /** Structured qualifications / licenses / certifications */
+  qualifications?: PractitionerQualificationInput[];
+  /** Languages the practitioner speaks (BCP-47 codes or display names) */
+  languages?: string[];
+  address?: {
+    line?: string[];
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
 }
 
 export interface PractitionerUpdateRequest {
   firstName?: string;
   lastName?: string;
+  prefix?: string[];
+  suffix?: string[];
   email?: string;
   phone?: string;
   gender?: 'male' | 'female' | 'other' | 'unknown';
+  birthDate?: string;
   active?: boolean;
   specialty?: string;
+  qualifications?: PractitionerQualificationInput[];
+  languages?: string[];
+  address?: {
+    line?: string[];
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
 }
 
 export interface PractitionerSearchParams extends PaginationParams {
   name?: string;
   specialty?: string;
+  npi?: string;
   active?: boolean;
 }
 
@@ -365,4 +404,218 @@ export interface LabUpdateRequest {
   status?: string;
   conclusion?: string;
   resultIds?: string[];
+}
+
+
+// ---------------------------------------------------------------------------
+// Notes (DocumentReference)
+// ---------------------------------------------------------------------------
+
+export type NoteType =
+  | 'progress-note'
+  | 'discharge-summary'
+  | 'consultation-note'
+  | 'history-and-physical'
+  | 'operative-note'
+  | 'procedure-note'
+  | 'referral-note'
+  | 'transfer-summary'
+  | 'other';
+
+export interface NoteCreateRequest {
+  patientId: string;
+  /** The practitioner who authored the note */
+  authorId?: string;
+  /** Encounter this note is associated with */
+  encounterId?: string;
+  /** Type of clinical note */
+  type?: NoteType;
+  /** Human-readable title / description */
+  title: string;
+  /** The note content — plain text or markdown */
+  content: string;
+  /** MIME type of the content (default: text/plain) */
+  contentType?: string;
+  /** Document status */
+  docStatus?: 'preliminary' | 'final' | 'amended';
+  /** Category tags for filtering */
+  category?: string;
+  /** Date the note was clinically relevant (defaults to now) */
+  date?: string;
+}
+
+export interface NoteUpdateRequest {
+  title?: string;
+  content?: string;
+  contentType?: string;
+  docStatus?: 'preliminary' | 'final' | 'amended';
+  category?: string;
+}
+
+export interface NoteSearchParams extends PaginationParams {
+  patientId?: string;
+  authorId?: string;
+  encounterId?: string;
+  type?: NoteType;
+  category?: string;
+  date?: string;
+}
+
+
+// ---------------------------------------------------------------------------
+// Prescriptions (MedicationRequest)
+// ---------------------------------------------------------------------------
+
+export interface PrescriptionCreateRequest {
+  patientId: string;
+  /** The prescribing practitioner */
+  prescriberId: string;
+  /** Encounter during which the prescription was written */
+  encounterId?: string;
+  /** Medication — RxNorm code, SNOMED code, or free-text name */
+  medication: string | { system?: string; code: string; display?: string };
+  /** Required — defaults to 'order' */
+  intent?: 'proposal' | 'plan' | 'order' | 'original-order';
+  status?: 'active' | 'on-hold' | 'cancelled' | 'completed' | 'draft';
+  priority?: 'routine' | 'urgent' | 'asap' | 'stat';
+  /** Dosage instructions in plain text (e.g. "Take 1 tablet twice daily with food") */
+  dosageText?: string;
+  /** Structured dosage */
+  dosage?: {
+    dose?: { value: number; unit: string };
+    frequency?: number;
+    period?: number;
+    periodUnit?: 'h' | 'd' | 'wk' | 'mo';
+    route?: string;
+  };
+  /** Number of refills allowed */
+  refills?: number;
+  /** Quantity to dispense */
+  quantity?: { value: number; unit: string };
+  /** Expected supply duration in days */
+  supplyDays?: number;
+  /** Allow generic substitution */
+  substitutionAllowed?: boolean;
+  /** Clinical reason for the prescription */
+  reason?: string;
+  /** Additional notes for the pharmacist */
+  note?: string;
+}
+
+export interface PrescriptionUpdateRequest {
+  status?: 'active' | 'on-hold' | 'cancelled' | 'completed' | 'stopped';
+  dosageText?: string;
+  refills?: number;
+  quantity?: { value: number; unit: string };
+  supplyDays?: number;
+  note?: string;
+}
+
+export interface PrescriptionSearchParams extends PaginationParams {
+  patientId?: string;
+  prescriberId?: string;
+  status?: string;
+  medication?: string;
+}
+
+
+// ---------------------------------------------------------------------------
+// PractitionerRole
+// ---------------------------------------------------------------------------
+
+export interface PractitionerRoleCreateRequest {
+  practitionerId: string;
+  organizationName?: string;
+  role: string;
+  specialty?: string[];
+  locationName?: string;
+  phone?: string;
+  email?: string;
+  availableDays?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
+  availableStartTime?: string;
+  availableEndTime?: string;
+}
+
+export interface PractitionerRoleUpdateRequest {
+  practitionerId?: string;
+  organizationName?: string;
+  role?: string;
+  specialty?: string[];
+  locationName?: string;
+  phone?: string;
+  email?: string;
+  availableDays?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[];
+  availableStartTime?: string;
+  availableEndTime?: string;
+  active?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Assessments (ClinicalImpression)
+// ---------------------------------------------------------------------------
+
+export interface AssessmentCreateRequest {
+  status: 'in-progress' | 'completed';
+  patientId: string;
+  encounterId?: string;
+  practitionerId?: string;
+  description?: string;
+  summary: string;
+  findings?: Array<{ code?: string; text: string }>;
+  note?: string;
+  effectiveDateTime?: string;
+}
+
+export interface AssessmentUpdateRequest {
+  status?: 'in-progress' | 'completed';
+  summary?: string;
+  findings?: Array<{ code?: string; text: string }>;
+  note?: string;
+}
+
+export interface AssessmentSearchParams extends PaginationParams {
+  patientId?: string;
+  practitionerId?: string;
+  status?: string;
+  encounterId?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Documents (Composition)
+// ---------------------------------------------------------------------------
+
+export interface DocumentCreateRequest {
+  status: 'preliminary' | 'final' | 'amended';
+  type: string;
+  patientId: string;
+  encounterId?: string;
+  practitionerId: string;
+  title: string;
+  date?: string;
+  sections: Array<{
+    title: string;
+    code?: string;
+    text: string;
+    resourceIds?: string[];
+  }>;
+  confidentiality?: 'N' | 'R' | 'V';
+}
+
+export interface DocumentUpdateRequest {
+  status?: 'preliminary' | 'final' | 'amended';
+  title?: string;
+  sections?: Array<{
+    title: string;
+    code?: string;
+    text: string;
+    resourceIds?: string[];
+  }>;
+}
+
+export interface DocumentSearchParams extends PaginationParams {
+  patientId?: string;
+  practitionerId?: string;
+  type?: string;
+  status?: string;
+  date?: string;
 }
