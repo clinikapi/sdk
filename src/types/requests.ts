@@ -386,9 +386,15 @@ export interface AppointmentUpdateRequest {
 export interface IntakeSubmitRequest {
   patientId: string;
   encounterId?: string;
-  /** Reference to the Questionnaire definition */
+  /** Who filled out the form (practitioner or device ID) */
+  authorId?: string;
+  /** Who provided the answers (patient, related person, practitioner) */
+  sourceId?: string;
+  /** Reference to the Questionnaire definition (canonical URL or ID) */
   questionnaire?: string;
   status?: 'in-progress' | 'completed' | 'amended' | 'stopped';
+  /** When the answers were gathered (defaults to now) */
+  authored?: string;
   items: Array<{
     linkId: string;
     text?: string;
@@ -396,8 +402,23 @@ export interface IntakeSubmitRequest {
       valueString?: string;
       valueBoolean?: boolean;
       valueInteger?: number;
+      valueDecimal?: number;
       valueDate?: string;
+      valueDateTime?: string;
       valueCoding?: { system?: string; code: string; display?: string };
+      valueQuantity?: { value: number; unit?: string };
+      valueUri?: string;
+    }>;
+    /** Nested sub-items (for grouped questions) */
+    items?: Array<{
+      linkId: string;
+      text?: string;
+      answer?: Array<{
+        valueString?: string;
+        valueBoolean?: boolean;
+        valueInteger?: number;
+        valueDate?: string;
+      }>;
     }>;
   }>;
 }
@@ -411,7 +432,20 @@ export interface IntakeUpdateRequest {
       valueString?: string;
       valueBoolean?: boolean;
       valueInteger?: number;
+      valueDecimal?: number;
       valueDate?: string;
+      valueDateTime?: string;
+      valueCoding?: { system?: string; code: string; display?: string };
+    }>;
+    items?: Array<{
+      linkId: string;
+      text?: string;
+      answer?: Array<{
+        valueString?: string;
+        valueBoolean?: boolean;
+        valueInteger?: number;
+        valueDate?: string;
+      }>;
     }>;
   }>;
 }
@@ -428,21 +462,41 @@ export interface ConsentSignRequest {
   /** Required — e.g. 'hipaa-notice', 'treatment-consent' */
   category: string | string[];
   dateTime?: string;
+  /** Who is agreeing to the policy (practitioner, organization, patient) */
+  performerId?: string;
+  /** Organization that is custodian of the consent */
+  organizationId?: string;
   /** Policy URI(s) the consent references */
   policyUri?: string;
+  /** Verification details */
+  verification?: {
+    verified: boolean;
+    verifiedWith?: string; // patient or related person ID
+    verificationDate?: string;
+  };
   /** Provision rules */
   provision?: {
     type?: 'deny' | 'permit';
     period?: { start?: string; end?: string };
     purpose?: Array<{ system?: string; code: string; display?: string }>;
+    /** Specific actions permitted/denied */
+    action?: Array<{ system?: string; code: string; display?: string }>;
+    /** Data classes the provision applies to */
+    class?: Array<{ system?: string; code: string; display?: string }>;
   };
 }
 
 export interface ConsentUpdateRequest {
   status?: 'draft' | 'proposed' | 'active' | 'rejected' | 'inactive';
+  verification?: {
+    verified: boolean;
+    verifiedWith?: string;
+    verificationDate?: string;
+  };
   provision?: {
     type?: 'deny' | 'permit';
     period?: { start?: string; end?: string };
+    action?: Array<{ system?: string; code: string; display?: string }>;
   };
 }
 
