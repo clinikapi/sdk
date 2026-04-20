@@ -139,6 +139,37 @@ export interface PatientReadResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Practitioner
+// ---------------------------------------------------------------------------
+
+export interface PractitionerCreateRequest {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  gender?: 'male' | 'female' | 'other' | 'unknown';
+  npi?: string; // National Provider Identifier
+  specialty?: string;
+  qualification?: string;
+}
+
+export interface PractitionerUpdateRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  gender?: 'male' | 'female' | 'other' | 'unknown';
+  active?: boolean;
+  specialty?: string;
+}
+
+export interface PractitionerSearchParams extends PaginationParams {
+  name?: string;
+  specialty?: string;
+  active?: boolean;
+}
+
+// ---------------------------------------------------------------------------
 // Encounter
 // ---------------------------------------------------------------------------
 

@@ -24,6 +24,7 @@ import type {
   Medication,
   Observation,
   Patient,
+  Practitioner,
   QuestionnaireResponse,
 } from './types/resources';
 
@@ -48,6 +49,9 @@ import type {
   PatientSearchParams,
   PatientUpdateRequest,
   PaginatedResponse,
+  PractitionerCreateRequest,
+  PractitionerUpdateRequest,
+  PractitionerSearchParams,
   ReadOptions,
   ResponseMeta,
 } from './types/requests';
@@ -315,6 +319,29 @@ export class Clinik {
     },
   };
 
+  // -------------------------------------------------------------------------
+  // practitioners
+  // -------------------------------------------------------------------------
+
+  public practitioners = {
+    create: async (data: PractitionerCreateRequest): Promise<ApiResponse<Practitioner>> => {
+      return this.request<Practitioner>('POST', '/v1/practitioners', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Practitioner>> => {
+      return this.request<Practitioner>('GET', `/v1/practitioners/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: PractitionerUpdateRequest): Promise<ApiResponse<Practitioner>> => {
+      return this.request<Practitioner>('PATCH', `/v1/practitioners/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/practitioners/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: PractitionerSearchParams): Promise<ApiResponse<PaginatedResponse<Practitioner>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Practitioner>>('GET', `/v1/practitioners${qs}`);
+    },
+  };
+
   private destructurePatientBundle(raw: any): PatientReadResponse {
     const result: PatientReadResponse = {
       patient: undefined as unknown as Patient,
@@ -365,6 +392,9 @@ export class Clinik {
     update: async (id: string, data: EncounterUpdateRequest): Promise<ApiResponse<Encounter>> => {
       return this.request<Encounter>('PATCH', `/v1/encounters/${this.sanitizeId(id)}`, data);
     },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/encounters/${this.sanitizeId(id)}`);
+    },
   };
 
   // -------------------------------------------------------------------------
@@ -384,6 +414,9 @@ export class Clinik {
     update: async (id: string, data: ObservationUpdateRequest): Promise<ApiResponse<Observation>> => {
       return this.request<Observation>('PATCH', `/v1/observations/${this.sanitizeId(id)}`, data);
     },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/observations/${this.sanitizeId(id)}`);
+    },
   };
 
   // -------------------------------------------------------------------------
@@ -399,6 +432,9 @@ export class Clinik {
     },
     update: async (id: string, data: MedicationUpdateRequest): Promise<ApiResponse<Medication>> => {
       return this.request<Medication>('PATCH', `/v1/medications/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/medications/${this.sanitizeId(id)}`);
     },
   };
 
@@ -419,6 +455,9 @@ export class Clinik {
     update: async (id: string, data: AppointmentUpdateRequest): Promise<ApiResponse<Appointment>> => {
       return this.request<Appointment>('PATCH', `/v1/appointments/${this.sanitizeId(id)}`, data);
     },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/appointments/${this.sanitizeId(id)}`);
+    },
   };
 
   // -------------------------------------------------------------------------
@@ -435,6 +474,9 @@ export class Clinik {
     update: async (id: string, data: IntakeUpdateRequest): Promise<ApiResponse<QuestionnaireResponse>> => {
       return this.request<QuestionnaireResponse>('PATCH', `/v1/intakes/${this.sanitizeId(id)}`, data);
     },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/intakes/${this.sanitizeId(id)}`);
+    },
   };
 
   // -------------------------------------------------------------------------
@@ -450,6 +492,9 @@ export class Clinik {
     },
     update: async (id: string, data: ConsentUpdateRequest): Promise<ApiResponse<Consent>> => {
       return this.request<Consent>('PATCH', `/v1/consents/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/consents/${this.sanitizeId(id)}`);
     },
   };
 
@@ -469,6 +514,9 @@ export class Clinik {
     },
     update: async (id: string, data: LabUpdateRequest): Promise<ApiResponse<DiagnosticReport>> => {
       return this.request<DiagnosticReport>('PATCH', `/v1/labs/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/labs/${this.sanitizeId(id)}`);
     },
   };
 }

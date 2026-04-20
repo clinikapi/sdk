@@ -93,6 +93,32 @@ export interface Patient extends DomainResource {
 
 
 // ---------------------------------------------------------------------------
+// Practitioner  (Normative)
+// @see https://www.hl7.org/fhir/R4/practitioner.html
+// ---------------------------------------------------------------------------
+
+export interface PractitionerQualification {
+  identifier?: Identifier[];
+  code: CodeableConcept;
+  period?: Period;
+  issuer?: Reference;
+}
+
+export interface Practitioner extends DomainResource {
+  resourceType: 'Practitioner';
+  identifier?: Identifier[];
+  active?: boolean;
+  name?: HumanName[];
+  telecom?: ContactPoint[];
+  address?: Address[];
+  gender?: 'male' | 'female' | 'other' | 'unknown';
+  birthDate?: FhirDate;
+  photo?: Attachment[];
+  qualification?: PractitionerQualification[];
+  communication?: CodeableConcept[];
+}
+
+// ---------------------------------------------------------------------------
 // Encounter  (Normative)
 // @see https://www.hl7.org/fhir/R4/encounter.html
 // ---------------------------------------------------------------------------
