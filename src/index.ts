@@ -371,6 +371,10 @@ export class Clinik {
       intakes: [],
       consents: [],
       labs: [],
+      prescriptions: [],
+      notes: [],
+      assessments: [],
+      documents: [],
     };
 
     if (raw.resourceType === 'Bundle' && raw.entry) {
@@ -386,6 +390,10 @@ export class Clinik {
           case 'QuestionnaireResponse': result.intakes.push(resource); break;
           case 'Consent': result.consents.push(resource); break;
           case 'DiagnosticReport': result.labs.push(resource); break;
+          case 'MedicationRequest': result.prescriptions.push(resource); break;
+          case 'DocumentReference': result.notes.push(resource); break;
+          case 'ClinicalImpression': result.assessments.push(resource); break;
+          case 'Composition': result.documents.push(resource); break;
         }
       }
     } else if (raw.resourceType === 'Patient') {

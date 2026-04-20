@@ -7,10 +7,14 @@
 
 import type {
   Appointment,
+  ClinicalImpression,
+  Composition,
   Consent,
   DiagnosticReport,
+  DocumentReference,
   Encounter,
   Medication,
+  MedicationRequest,
   Observation,
   Patient,
   QuestionnaireResponse,
@@ -136,6 +140,10 @@ export interface PatientReadResponse {
   intakes: QuestionnaireResponse[];
   consents: Consent[];
   labs: DiagnosticReport[];
+  prescriptions: MedicationRequest[];
+  notes: DocumentReference[];
+  assessments: ClinicalImpression[];
+  documents: Composition[];
 }
 
 // ---------------------------------------------------------------------------
@@ -218,17 +226,37 @@ export interface EncounterCreateRequest {
   class: string;
   patientId: string;
   practitionerId?: string;
+  /** Type of encounter (e.g. 'wellness visit', 'follow-up', 'urgent care') */
   type?: string;
+  /** Service type (e.g. 'cardiology', 'general practice') */
+  serviceType?: string;
+  /** Priority/urgency of the encounter */
+  priority?: string;
+  /** Reason for the encounter */
   reasonCode?: string;
+  /** Time period of the encounter */
   period?: { start?: string; end?: string };
+  /** Duration in minutes (alternative to period) */
+  lengthMinutes?: number;
+  /** Location name where the encounter took place */
+  location?: string;
+  /** Organization/service provider name */
+  serviceProvider?: string;
+  /** Diagnosis codes or descriptions addressed during the encounter */
+  diagnosis?: Array<{ condition: string; use?: string; rank?: number }>;
 }
 
 export interface EncounterUpdateRequest {
   status?: string;
   class?: string;
   type?: string;
+  serviceType?: string;
+  priority?: string;
   reasonCode?: string;
   period?: { start?: string; end?: string };
+  lengthMinutes?: number;
+  location?: string;
+  diagnosis?: Array<{ condition: string; use?: string; rank?: number }>;
 }
 
 // ---------------------------------------------------------------------------
@@ -241,6 +269,8 @@ export interface ObservationCreateRequest {
   code: string | { system?: string; code: string; display?: string };
   patientId: string;
   encounterId?: string;
+  /** Who performed/recorded the observation */
+  performerId?: string;
   effectiveDateTime?: string;
   /** Numeric value with optional unit */
   valueQuantity?: { value: number; unit?: string; system?: string; code?: string };
@@ -252,7 +282,16 @@ export interface ObservationCreateRequest {
     valueQuantity?: { value: number; unit?: string; system?: string; code?: string };
     valueString?: string;
   }>;
+  /** Category (e.g. 'vital-signs', 'laboratory', 'social-history', 'exam') */
   category?: string;
+  /** Clinical interpretation (e.g. 'H' high, 'L' low, 'N' normal, 'A' abnormal) */
+  interpretation?: string;
+  /** Normal reference range */
+  referenceRange?: { low?: { value: number; unit?: string }; high?: { value: number; unit?: string }; text?: string };
+  /** Body site where observation was made */
+  bodySite?: string;
+  /** Method used to make the observation */
+  method?: string;
   note?: string;
 }
 
@@ -260,6 +299,7 @@ export interface ObservationUpdateRequest {
   status?: string;
   valueQuantity?: { value: number; unit?: string; system?: string; code?: string };
   valueString?: string;
+  interpretation?: string;
   note?: string;
 }
 
@@ -392,18 +432,33 @@ export interface LabCreateRequest {
   code: string | { system?: string; code: string; display?: string };
   patientId: string;
   encounterId?: string;
+  /** When the report is clinically relevant */
   effectiveDateTime?: string;
   /** References to Observation resources that are part of this report */
   resultIds?: string[];
+  /** Category (e.g. 'LAB', 'RAD', 'PAT' for lab/radiology/pathology) */
   category?: string;
+  /** Clinical conclusion / interpretation text */
   conclusion?: string;
+  /** Conclusion codes (e.g. SNOMED findings) */
+  conclusionCodes?: Array<{ system?: string; code: string; display?: string }>;
+  /** Practitioner who performed the diagnostic */
   performer?: string;
+  /** Practitioner who interpreted the results */
+  resultsInterpreter?: string;
+  /** Specimen IDs referenced by this report */
+  specimenIds?: string[];
+  /** Attached report documents (e.g. PDF lab report) */
+  presentedForm?: Array<{ contentType: string; data?: string; url?: string; title?: string }>;
 }
 
 export interface LabUpdateRequest {
   status?: string;
   conclusion?: string;
+  conclusionCodes?: Array<{ system?: string; code: string; display?: string }>;
   resultIds?: string[];
+  resultsInterpreter?: string;
+  presentedForm?: Array<{ contentType: string; data?: string; url?: string; title?: string }>;
 }
 
 
