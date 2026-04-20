@@ -2,13 +2,46 @@
  * ClinikAPI Error Types
  *
  * Structured error handling with FHIR OperationOutcome awareness.
+ *
+ * SECURITY: The `diagnostics` field from FHIR OperationOutcome may contain PHI
+ * (patient names, IDs, clinical data). The `sanitizeDiagnostics` function strips
+ * common PHI patterns before they reach application logs or error tracking.
  */
+
+/** Patterns that commonly appear in FHIR diagnostics containing PHI */
+const PHI_PATTERNS = [
+  // Email addresses
+  /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+  // Phone numbers (various formats)
+  /(\+?1?[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
+  // SSN patterns
+  /\b\d{3}-\d{2}-\d{4}\b/g,
+  // Date of birth patterns (YYYY-MM-DD)
+  /\b(19|20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/g,
+];
+
+/**
+ * Strip potential PHI from FHIR OperationOutcome diagnostics strings.
+ * Replaces detected patterns with [REDACTED] to prevent PHI leaking into logs.
+ */
+function sanitizeDiagnostics(text: string | undefined): string | undefined {
+  if (!text) return text;
+  let sanitized = text;
+  for (const pattern of PHI_PATTERNS) {
+    sanitized = sanitized.replace(pattern, '[REDACTED]');
+  }
+  // Truncate excessively long diagnostics that might contain embedded clinical data
+  if (sanitized.length > 500) {
+    sanitized = sanitized.slice(0, 500) + '... [truncated]';
+  }
+  return sanitized;
+}
 
 export interface ClinikErrorDetails {
   status: number;
   code: string;
   message: string;
-  /** FHIR OperationOutcome issues, if the server returned them */
+  /** FHIR OperationOutcome issues — diagnostics are sanitized to strip potential PHI */
   issues?: Array<{
     severity: 'fatal' | 'error' | 'warning' | 'information';
     code: string;
@@ -75,6 +108,7 @@ export class ClinikRateLimitError extends ClinikApiError {
 
 /**
  * Parse an HTTP response into the appropriate ClinikApiError subclass.
+ * SECURITY: Sanitizes FHIR OperationOutcome diagnostics to strip potential PHI.
  */
 export async function parseErrorResponse(response: Response): Promise<ClinikApiError> {
   let body: any;
@@ -85,8 +119,16 @@ export async function parseErrorResponse(response: Response): Promise<ClinikApiE
   }
 
   const message = body?.message || body?.error || response.statusText;
-  const issues = body?.issue; // FHIR OperationOutcome shape
   const requestId = response.headers.get('x-request-id') || undefined;
+
+  // Sanitize FHIR OperationOutcome issues to prevent PHI leakage
+  const rawIssues = body?.issue;
+  const issues = Array.isArray(rawIssues)
+    ? rawIssues.map((issue: any) => ({
+        ...issue,
+        diagnostics: sanitizeDiagnostics(issue.diagnostics),
+      }))
+    : undefined;
 
   switch (response.status) {
     case 401:

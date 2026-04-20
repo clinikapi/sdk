@@ -91,10 +91,27 @@ export class Clinik {
    */
   constructor(apiKey: string, options?: ClinikOptions) {
     if (!apiKey) throw new Error('ClinikAPI: apiKey is required');
+
+    // SECURITY: Warn if SDK is being used in a browser environment
+    if (typeof window !== 'undefined' && typeof process === 'undefined') {
+      console.warn(
+        '[ClinikAPI] WARNING: The SDK is being used in a browser environment. ' +
+        'This will expose your secret API key. Use @clinikapi/react for client-side code.'
+      );
+    }
+
     this.apiKey = apiKey;
     this.baseUrl = (options?.baseUrl || 'https://api.clinikehr.com').replace(/\/+$/, '');
     this.timeout = options?.timeout ?? 30_000;
     this.maxRetries = options?.retries ?? 2;
+
+    // SECURITY: Validate baseUrl is HTTPS in production
+    if (!this.baseUrl.startsWith('https://') && !this.baseUrl.startsWith('http://localhost')) {
+      console.warn(
+        '[ClinikAPI] WARNING: baseUrl is not using HTTPS. ' +
+        'API keys and PHI will be transmitted in plaintext.'
+      );
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -117,20 +134,58 @@ export class Clinik {
     return val ? parseInt(val, 10) : undefined;
   }
 
+  /** Max request body size in bytes (1MB). Prevents accidental OOM from circular or massive objects. */
+  private static readonly MAX_BODY_SIZE = 1_048_576;
+
+  /**
+   * Compute retry backoff with jitter to prevent thundering herd.
+   * Uses "full jitter" strategy: random value between 0 and the exponential cap.
+   */
+  private computeBackoff(attempt: number): number {
+    const exponentialCap = Math.min(1000 * 2 ** attempt, 10_000);
+    return Math.floor(Math.random() * exponentialCap);
+  }
+
+  /**
+   * Safely serialize a request body with size validation.
+   * Catches circular references and enforces a max payload size.
+   */
+  private serializeBody(body: unknown): string {
+    let serialized: string;
+    try {
+      serialized = JSON.stringify(body);
+    } catch (err) {
+      throw new Error(
+        'ClinikAPI: Failed to serialize request body. ' +
+        'Ensure the payload is a plain JSON-serializable object with no circular references.'
+      );
+    }
+    if (serialized.length > Clinik.MAX_BODY_SIZE) {
+      throw new Error(
+        `ClinikAPI: Request body exceeds maximum size of ${Clinik.MAX_BODY_SIZE} bytes ` +
+        `(got ${serialized.length} bytes). Reduce the payload size.`
+      );
+    }
+    return serialized;
+  }
+
   private async request<T>(method: string, path: string, body?: unknown): Promise<ApiResponse<T>> {
+    // Pre-serialize body once (validates size + catches circular refs before any network call)
+    const serializedBody = body !== undefined ? this.serializeBody(body) : undefined;
+
     let lastError: Error | undefined;
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), this.timeout);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.timeout);
 
+      try {
         const headers: Record<string, string> = {
           'x-api-key': this.apiKey,
           'Accept': 'application/fhir+json',
         };
 
-        if (body) {
+        if (serializedBody) {
           headers['Content-Type'] = method === 'PATCH'
             ? 'application/json-patch+json'
             : 'application/fhir+json';
@@ -139,7 +194,7 @@ export class Clinik {
         const response = await fetch(`${this.baseUrl}${path}`, {
           method,
           headers,
-          body: body ? JSON.stringify(body) : undefined,
+          body: serializedBody,
           signal: controller.signal,
         });
 
@@ -149,8 +204,7 @@ export class Clinik {
           const error = await parseErrorResponse(response);
           if (attempt < this.maxRetries && (response.status >= 500 || response.status === 429)) {
             lastError = error;
-            const backoff = Math.min(1000 * 2 ** attempt, 10_000);
-            await new Promise(r => setTimeout(r, backoff));
+            await new Promise(r => setTimeout(r, this.computeBackoff(attempt)));
             continue;
           }
           throw error;
@@ -163,6 +217,9 @@ export class Clinik {
         const data = await response.json() as T;
         return { data, meta };
       } catch (err: any) {
+        // Always clear the timer to prevent leaks, even on error paths
+        clearTimeout(timer);
+
         if (err.name === 'AbortError') {
           lastError = new Error(`ClinikAPI: Request timed out after ${this.timeout}ms`);
         } else if (err.name?.startsWith('Clinik')) {
@@ -171,8 +228,7 @@ export class Clinik {
           lastError = err;
         }
         if (attempt < this.maxRetries) {
-          const backoff = Math.min(1000 * 2 ** attempt, 10_000);
-          await new Promise(r => setTimeout(r, backoff));
+          await new Promise(r => setTimeout(r, this.computeBackoff(attempt)));
           continue;
         }
       }
@@ -191,6 +247,36 @@ export class Clinik {
     return str ? `?${str}` : '';
   }
 
+  /**
+   * SECURITY: Sanitize resource IDs to prevent path traversal and injection.
+   * IDs must be alphanumeric with hyphens, underscores, and dots only.
+   */
+  private sanitizeId(id: string): string {
+    if (!id || typeof id !== 'string') {
+      throw new Error('ClinikAPI: Resource ID is required and must be a string');
+    }
+    // Strip any path traversal attempts and restrict to safe characters
+    const sanitized = id.replace(/[^a-zA-Z0-9\-_.]/g, '');
+    if (sanitized !== id) {
+      throw new Error(`ClinikAPI: Invalid resource ID "${id}" — IDs may only contain alphanumeric characters, hyphens, underscores, and dots`);
+    }
+    if (sanitized.length === 0 || sanitized.length > 128) {
+      throw new Error('ClinikAPI: Resource ID must be between 1 and 128 characters');
+    }
+    return sanitized;
+  }
+
+  /**
+   * SECURITY: Sanitize FHIR _include / _revinclude values to prevent injection.
+   * Include values must match the pattern "ResourceType:field".
+   */
+  private sanitizeInclude(value: string): string {
+    if (!/^[A-Za-z]+(?::[A-Za-z]+)?$/.test(value)) {
+      throw new Error(`ClinikAPI: Invalid include value "${value}" — must be a FHIR resource type or ResourceType:field`);
+    }
+    return value;
+  }
+
   // -------------------------------------------------------------------------
   // patients
   // -------------------------------------------------------------------------
@@ -201,20 +287,22 @@ export class Clinik {
     },
 
     read: async (id: string, options?: ReadOptions): Promise<ApiResponse<PatientReadResponse>> => {
+      const safeId = this.sanitizeId(id);
       const params = new URLSearchParams();
       if (options?.include) {
         options.include.forEach(inc => {
-          params.append('_revinclude', `${inc}:subject`);
-          params.append('_revinclude', `${inc}:patient`);
+          const safeInc = this.sanitizeInclude(inc);
+          params.append('_revinclude', `${safeInc}:subject`);
+          params.append('_revinclude', `${safeInc}:patient`);
         });
       }
       const qs = params.toString() ? `?${params.toString()}` : '';
-      const response = await this.request<any>('GET', `/v1/patients/${id}${qs}`);
+      const response = await this.request<any>('GET', `/v1/patients/${safeId}${qs}`);
       return { data: this.destructurePatientBundle(response.data), meta: response.meta };
     },
 
     update: async (id: string, data: PatientUpdateRequest): Promise<ApiResponse<Patient>> => {
-      return this.request<Patient>('PATCH', `/v1/patients/${id}`, data);
+      return this.request<Patient>('PATCH', `/v1/patients/${this.sanitizeId(id)}`, data);
     },
 
     search: async (params?: PatientSearchParams): Promise<ApiResponse<PaginatedResponse<Patient>>> => {
@@ -223,7 +311,7 @@ export class Clinik {
     },
 
     delete: async (id: string): Promise<ApiResponse<void>> => {
-      return this.request<void>('DELETE', `/v1/patients/${id}`);
+      return this.request<void>('DELETE', `/v1/patients/${this.sanitizeId(id)}`);
     },
   };
 
@@ -270,12 +358,12 @@ export class Clinik {
     },
     read: async (id: string, options?: ReadOptions): Promise<ApiResponse<Encounter>> => {
       const qs = options?.include
-        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `Encounter:${i}`])))
+        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `Encounter:${this.sanitizeInclude(i)}`])))
         : '';
-      return this.request<Encounter>('GET', `/v1/encounters/${id}${qs}`);
+      return this.request<Encounter>('GET', `/v1/encounters/${this.sanitizeId(id)}${qs}`);
     },
     update: async (id: string, data: EncounterUpdateRequest): Promise<ApiResponse<Encounter>> => {
-      return this.request<Encounter>('PATCH', `/v1/encounters/${id}`, data);
+      return this.request<Encounter>('PATCH', `/v1/encounters/${this.sanitizeId(id)}`, data);
     },
   };
 
@@ -289,12 +377,12 @@ export class Clinik {
     },
     read: async (id: string, options?: ReadOptions): Promise<ApiResponse<Observation>> => {
       const qs = options?.include
-        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `Observation:${i}`])))
+        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `Observation:${this.sanitizeInclude(i)}`])))
         : '';
-      return this.request<Observation>('GET', `/v1/observations/${id}${qs}`);
+      return this.request<Observation>('GET', `/v1/observations/${this.sanitizeId(id)}${qs}`);
     },
     update: async (id: string, data: ObservationUpdateRequest): Promise<ApiResponse<Observation>> => {
-      return this.request<Observation>('PATCH', `/v1/observations/${id}`, data);
+      return this.request<Observation>('PATCH', `/v1/observations/${this.sanitizeId(id)}`, data);
     },
   };
 
@@ -307,10 +395,10 @@ export class Clinik {
       return this.request<Medication>('POST', '/v1/medications', data);
     },
     read: async (id: string): Promise<ApiResponse<Medication>> => {
-      return this.request<Medication>('GET', `/v1/medications/${id}`);
+      return this.request<Medication>('GET', `/v1/medications/${this.sanitizeId(id)}`);
     },
     update: async (id: string, data: MedicationUpdateRequest): Promise<ApiResponse<Medication>> => {
-      return this.request<Medication>('PATCH', `/v1/medications/${id}`, data);
+      return this.request<Medication>('PATCH', `/v1/medications/${this.sanitizeId(id)}`, data);
     },
   };
 
@@ -324,12 +412,12 @@ export class Clinik {
     },
     read: async (id: string, options?: ReadOptions): Promise<ApiResponse<Appointment>> => {
       const qs = options?.include
-        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `Appointment:${i}`])))
+        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `Appointment:${this.sanitizeInclude(i)}`])))
         : '';
-      return this.request<Appointment>('GET', `/v1/appointments/${id}${qs}`);
+      return this.request<Appointment>('GET', `/v1/appointments/${this.sanitizeId(id)}${qs}`);
     },
     update: async (id: string, data: AppointmentUpdateRequest): Promise<ApiResponse<Appointment>> => {
-      return this.request<Appointment>('PATCH', `/v1/appointments/${id}`, data);
+      return this.request<Appointment>('PATCH', `/v1/appointments/${this.sanitizeId(id)}`, data);
     },
   };
 
@@ -342,10 +430,10 @@ export class Clinik {
       return this.request<QuestionnaireResponse>('POST', '/v1/intakes', data);
     },
     read: async (id: string): Promise<ApiResponse<QuestionnaireResponse>> => {
-      return this.request<QuestionnaireResponse>('GET', `/v1/intakes/${id}`);
+      return this.request<QuestionnaireResponse>('GET', `/v1/intakes/${this.sanitizeId(id)}`);
     },
     update: async (id: string, data: IntakeUpdateRequest): Promise<ApiResponse<QuestionnaireResponse>> => {
-      return this.request<QuestionnaireResponse>('PATCH', `/v1/intakes/${id}`, data);
+      return this.request<QuestionnaireResponse>('PATCH', `/v1/intakes/${this.sanitizeId(id)}`, data);
     },
   };
 
@@ -358,10 +446,10 @@ export class Clinik {
       return this.request<Consent>('POST', '/v1/consents', data);
     },
     read: async (id: string): Promise<ApiResponse<Consent>> => {
-      return this.request<Consent>('GET', `/v1/consents/${id}`);
+      return this.request<Consent>('GET', `/v1/consents/${this.sanitizeId(id)}`);
     },
     update: async (id: string, data: ConsentUpdateRequest): Promise<ApiResponse<Consent>> => {
-      return this.request<Consent>('PATCH', `/v1/consents/${id}`, data);
+      return this.request<Consent>('PATCH', `/v1/consents/${this.sanitizeId(id)}`, data);
     },
   };
 
@@ -375,12 +463,12 @@ export class Clinik {
     },
     read: async (id: string, options?: ReadOptions): Promise<ApiResponse<DiagnosticReport>> => {
       const qs = options?.include
-        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `DiagnosticReport:${i}`])))
+        ? this.buildQuery(Object.fromEntries(options.include.map(i => [`_include`, `DiagnosticReport:${this.sanitizeInclude(i)}`])))
         : '';
-      return this.request<DiagnosticReport>('GET', `/v1/labs/${id}${qs}`);
+      return this.request<DiagnosticReport>('GET', `/v1/labs/${this.sanitizeId(id)}${qs}`);
     },
     update: async (id: string, data: LabUpdateRequest): Promise<ApiResponse<DiagnosticReport>> => {
-      return this.request<DiagnosticReport>('PATCH', `/v1/labs/${id}`, data);
+      return this.request<DiagnosticReport>('PATCH', `/v1/labs/${this.sanitizeId(id)}`, data);
     },
   };
 }
