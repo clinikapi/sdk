@@ -72,6 +72,7 @@ import type {
   PrescriptionUpdateRequest,
   PrescriptionSearchParams,
   ReadOptions,
+  ResourceSearchParams,
   ResponseMeta,
 } from './types/requests';
 
@@ -422,6 +423,10 @@ export class Clinik {
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/encounters/${this.sanitizeId(id)}`);
     },
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<Encounter>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Encounter>>('GET', `/v1/encounters${qs}`);
+    },
   };
 
   // -------------------------------------------------------------------------
@@ -444,6 +449,10 @@ export class Clinik {
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/observations/${this.sanitizeId(id)}`);
     },
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<Observation>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Observation>>('GET', `/v1/observations${qs}`);
+    },
   };
 
   // -------------------------------------------------------------------------
@@ -463,9 +472,11 @@ export class Clinik {
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/medications/${this.sanitizeId(id)}`);
     },
-  };
-
-  // -------------------------------------------------------------------------
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<Medication>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Medication>>('GET', `/v1/medications${qs}`);
+    },
+  };  // -------------------------------------------------------------------------
   // appointments
   // -------------------------------------------------------------------------
 
@@ -484,6 +495,10 @@ export class Clinik {
     },
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/appointments/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<Appointment>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Appointment>>('GET', `/v1/appointments${qs}`);
     },
   };
 
@@ -504,6 +519,10 @@ export class Clinik {
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/intakes/${this.sanitizeId(id)}`);
     },
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<QuestionnaireResponse>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<QuestionnaireResponse>>('GET', `/v1/intakes${qs}`);
+    },
   };
 
   // -------------------------------------------------------------------------
@@ -522,6 +541,10 @@ export class Clinik {
     },
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/consents/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<Consent>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Consent>>('GET', `/v1/consents${qs}`);
     },
   };
 
@@ -544,6 +567,10 @@ export class Clinik {
     },
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/labs/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<DiagnosticReport>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<DiagnosticReport>>('GET', `/v1/labs${qs}`);
     },
   };
 
@@ -609,6 +636,10 @@ export class Clinik {
     },
     delete: async (id: string): Promise<ApiResponse<void>> => {
       return this.request<void>('DELETE', `/v1/practitioner-roles/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ResourceSearchParams): Promise<ApiResponse<PaginatedResponse<PractitionerRole>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<PractitionerRole>>('GET', `/v1/practitioner-roles${qs}`);
     },
   };
 

@@ -37,6 +37,15 @@ export interface PaginationParams {
   cursor?: string;
 }
 
+/** Generic search params for resources without specific search types */
+export interface ResourceSearchParams extends PaginationParams {
+  patientId?: string;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sort?: string;
+}
+
 /** Standard paginated list response */
 export interface PaginatedResponse<T> {
   data: T[];
@@ -337,21 +346,36 @@ export interface AppointmentCreateRequest {
   start?: string;
   end?: string;
   minutesDuration?: number;
+  /** Type of appointment (e.g. 'routine', 'walkin', 'urgent', 'followup') */
   appointmentType?: string;
+  /** Service being booked (e.g. 'cardiology consultation', 'physical therapy') */
   serviceType?: string;
+  /** Service category (e.g. 'general-practice', 'specialist', 'dental') */
+  serviceCategory?: string;
+  /** Specialty required (e.g. 'cardiology', 'dermatology') */
+  specialty?: string;
+  /** Reason for the appointment */
   reasonCode?: string;
+  /** Priority (0 = routine, 1-9 = increasing urgency) */
+  priority?: number;
+  /** Shown on a subject line in a meeting request */
   description?: string;
+  /** Additional comments about the appointment */
   comment?: string;
+  /** Instructions for the patient (e.g. 'fast for 12 hours') */
   patientInstruction?: string;
+  /** Reason for cancellation (only when status is cancelled/noshow) */
+  cancelationReason?: string;
 }
 
 export interface AppointmentUpdateRequest {
-  status?: string;
+  status?: 'proposed' | 'pending' | 'booked' | 'arrived' | 'fulfilled' | 'cancelled' | 'noshow' | 'checked-in' | 'waitlist';
   start?: string;
   end?: string;
   minutesDuration?: number;
   description?: string;
   comment?: string;
+  patientInstruction?: string;
   cancelationReason?: string;
 }
 
