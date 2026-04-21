@@ -302,6 +302,52 @@ export class Clinik {
   }
 
   // -------------------------------------------------------------------------
+  // fhir (raw FHIR escape hatch)
+  // -------------------------------------------------------------------------
+
+  /**
+   * Raw FHIR R4 escape hatch.
+   *
+   * Use this when the simplified SDK methods don't cover your use case.
+   * Sends requests directly to the ClinikAPI FHIR gateway with your tenant
+   * context automatically applied (tenant tag injection + isolation).
+   *
+   * The path should be a FHIR resource path (e.g. '/Patient', '/Observation/123').
+   * Do NOT include '/v1/' prefix — this goes directly to the FHIR layer.
+   *
+   * @example
+   * // Create a raw FHIR resource
+   * const { data } = await clinik.fhir.request('POST', '/Patient', {
+   *   resourceType: 'Patient',
+   *   name: [{ family: 'Smith', given: ['John'] }],
+   *   gender: 'male',
+   *   birthDate: '1990-01-15'
+   * });
+   *
+   * @example
+   * // Search with custom FHIR parameters
+   * const { data } = await clinik.fhir.request('GET', '/Observation?code=8867-4&date=ge2024-01-01');
+   *
+   * @example
+   * // Execute a FHIR operation
+   * const { data } = await clinik.fhir.request('POST', '/Patient/$everything', { id: 'pt_123' });
+   */
+  public fhir = {
+    request: async <T = any>(method: string, path: string, body?: unknown): Promise<ApiResponse<T>> => {
+      // Validate method
+      const allowedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+      if (!allowedMethods.includes(method.toUpperCase())) {
+        throw new Error(`ClinikAPI: Invalid HTTP method "${method}". Allowed: ${allowedMethods.join(', ')}`);
+      }
+
+      // Ensure path starts with /
+      const fhirPath = path.startsWith('/') ? path : `/${path}`;
+
+      return this.request<T>(method.toUpperCase(), `/v1/fhir${fhirPath}`, body);
+    },
+  };
+
+  // -------------------------------------------------------------------------
   // patients
   // -------------------------------------------------------------------------
 
