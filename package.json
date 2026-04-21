@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Server-side TypeScript SDK for the ClinikAPI healthcare infrastructure platform",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/clinikapi/sdk.git"
