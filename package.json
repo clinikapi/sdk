@@ -1,14 +1,44 @@
 {
   "name": "@clinikapi/sdk",
   "version": "0.1.0",
+  "description": "Server-side TypeScript SDK for the ClinikAPI healthcare infrastructure platform",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clinikapi/sdk.git"
+  },
+  "homepage": "https://docs.clinikapi.com/sdk/installation",
+  "keywords": ["clinikapi", "fhir", "healthcare", "ehr", "healthlake", "hipaa", "sdk"],
+  "sideEffects": false,
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./types/*": {
+      "types": "./dist/types/*.d.ts",
+      "import": "./dist/types/*.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.4.0"
   }
 }
