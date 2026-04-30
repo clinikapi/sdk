@@ -31,6 +31,54 @@ import type {
   Practitioner,
   PractitionerRole,
   QuestionnaireResponse,
+  AppointmentResponse,
+  Task,
+  Slot,
+  Organization,
+  Account,
+  HealthcareService,
+  ServiceRequest,
+  Location,
+  Schedule,
+  Person,
+  FamilyMemberHistory,
+  CarePlan,
+  Immunization,
+  Claim,
+  ClaimResponse,
+  AllergyIntolerance,
+  CareTeam,
+  Condition,
+  ChargeItem,
+  Coverage,
+  CoverageEligibilityRequest,
+  CoverageEligibilityResponse,
+  ExplanationOfBenefit,
+  Device,
+  DeviceRequest,
+  DeviceUseStatement,
+  Goal,
+  Invoice,
+  MedicationDispense,
+  MedicationKnowledge,
+  MedicationStatement,
+  PaymentNotice,
+  PaymentReconciliation,
+  Specimen,
+  ImagingStudy,
+  EnrollmentRequest,
+  EnrollmentResponse,
+  ImmunizationEvaluation,
+  Media,
+  ActivityDefinition,
+  NutritionOrder,
+  PlanDefinition,
+  VisionPrescription,
+  RiskAssessment,
+  AuditEvent,
+  Measure,
+  MeasureReport,
+  ImmunizationRecommendation,
 } from './types/resources';
 
 import type {
@@ -74,6 +122,150 @@ import type {
   ReadOptions,
   ResourceSearchParams,
   ResponseMeta,
+  AppointmentResponseCreateRequest,
+  AppointmentResponseUpdateRequest,
+  AppointmentResponseSearchParams,
+  TaskCreateRequest,
+  TaskUpdateRequest,
+  TaskSearchParams,
+  SlotCreateRequest,
+  SlotUpdateRequest,
+  SlotSearchParams,
+  OrganizationCreateRequest,
+  OrganizationUpdateRequest,
+  OrganizationSearchParams,
+  AccountCreateRequest,
+  AccountUpdateRequest,
+  AccountSearchParams,
+  HealthcareServiceCreateRequest,
+  HealthcareServiceUpdateRequest,
+  HealthcareServiceSearchParams,
+  ServiceRequestCreateRequest,
+  ServiceRequestUpdateRequest,
+  ServiceRequestSearchParams,
+  LocationCreateRequest,
+  LocationUpdateRequest,
+  LocationSearchParams,
+  ScheduleCreateRequest,
+  ScheduleUpdateRequest,
+  ScheduleSearchParams,
+  PersonCreateRequest,
+  PersonUpdateRequest,
+  PersonSearchParams,
+  FamilyMemberHistoryCreateRequest,
+  FamilyMemberHistoryUpdateRequest,
+  FamilyMemberHistorySearchParams,
+  CarePlanCreateRequest,
+  CarePlanUpdateRequest,
+  CarePlanSearchParams,
+  ImmunizationCreateRequest,
+  ImmunizationUpdateRequest,
+  ImmunizationSearchParams,
+  ClaimCreateRequest,
+  ClaimUpdateRequest,
+  ClaimSearchParams,
+  ClaimResponseCreateRequest,
+  ClaimResponseUpdateRequest,
+  ClaimResponseSearchParams,
+  AllergyIntoleranceCreateRequest,
+  AllergyIntoleranceUpdateRequest,
+  AllergyIntoleranceSearchParams,
+  CareTeamCreateRequest,
+  CareTeamUpdateRequest,
+  CareTeamSearchParams,
+  ConditionCreateRequest,
+  ConditionUpdateRequest,
+  ConditionSearchParams,
+  ChargeItemCreateRequest,
+  ChargeItemUpdateRequest,
+  ChargeItemSearchParams,
+  CoverageCreateRequest,
+  CoverageUpdateRequest,
+  CoverageSearchParams,
+  EligibilityRequestCreateRequest,
+  EligibilityRequestUpdateRequest,
+  EligibilityRequestSearchParams,
+  EligibilityResponseCreateRequest,
+  EligibilityResponseUpdateRequest,
+  EligibilityResponseSearchParams,
+  EOBCreateRequest,
+  EOBUpdateRequest,
+  EOBSearchParams,
+  DeviceCreateRequest,
+  DeviceUpdateRequest,
+  DeviceSearchParams,
+  DeviceRequestCreateRequest,
+  DeviceRequestUpdateRequest,
+  DeviceRequestSearchParams,
+  DeviceUseStatementCreateRequest,
+  DeviceUseStatementUpdateRequest,
+  DeviceUseStatementSearchParams,
+  GoalCreateRequest,
+  GoalUpdateRequest,
+  GoalSearchParams,
+  InvoiceCreateRequest,
+  InvoiceUpdateRequest,
+  InvoiceSearchParams,
+  MedicationDispenseCreateRequest,
+  MedicationDispenseUpdateRequest,
+  MedicationDispenseSearchParams,
+  MedicationKnowledgeCreateRequest,
+  MedicationKnowledgeUpdateRequest,
+  MedicationKnowledgeSearchParams,
+  MedicationStatementCreateRequest,
+  MedicationStatementUpdateRequest,
+  MedicationStatementSearchParams,
+  PaymentNoticeCreateRequest,
+  PaymentNoticeUpdateRequest,
+  PaymentNoticeSearchParams,
+  PaymentReconciliationCreateRequest,
+  PaymentReconciliationUpdateRequest,
+  PaymentReconciliationSearchParams,
+  SpecimenCreateRequest,
+  SpecimenUpdateRequest,
+  SpecimenSearchParams,
+  ImagingStudyCreateRequest,
+  ImagingStudyUpdateRequest,
+  ImagingStudySearchParams,
+  EnrollmentRequestCreateRequest,
+  EnrollmentRequestUpdateRequest,
+  EnrollmentRequestSearchParams,
+  EnrollmentResponseCreateRequest,
+  EnrollmentResponseUpdateRequest,
+  EnrollmentResponseSearchParams,
+  ImmunizationEvaluationCreateRequest,
+  ImmunizationEvaluationUpdateRequest,
+  ImmunizationEvaluationSearchParams,
+  MediaCreateRequest,
+  MediaUpdateRequest,
+  MediaSearchParams,
+  ActivityDefinitionCreateRequest,
+  ActivityDefinitionUpdateRequest,
+  ActivityDefinitionSearchParams,
+  NutritionOrderCreateRequest,
+  NutritionOrderUpdateRequest,
+  NutritionOrderSearchParams,
+  PlanDefinitionCreateRequest,
+  PlanDefinitionUpdateRequest,
+  PlanDefinitionSearchParams,
+  VisionPrescriptionCreateRequest,
+  VisionPrescriptionUpdateRequest,
+  VisionPrescriptionSearchParams,
+  RiskAssessmentCreateRequest,
+  RiskAssessmentUpdateRequest,
+  RiskAssessmentSearchParams,
+  AuditEventCreateRequest,
+  AuditEventUpdateRequest,
+  AuditEventSearchParams,
+  MeasureCreateRequest,
+  MeasureUpdateRequest,
+  MeasureSearchParams,
+  MeasureReportCreateRequest,
+  MeasureReportUpdateRequest,
+  MeasureReportSearchParams,
+  ImmunizationRecommendationCreateRequest,
+  ImmunizationRecommendationUpdateRequest,
+  ImmunizationRecommendationSearchParams,
 } from './types/requests';
 
 import { parseErrorResponse } from './errors';
@@ -83,7 +275,7 @@ import { parseErrorResponse } from './errors';
 // ---------------------------------------------------------------------------
 
 export interface ClinikOptions {
-  /** Override the API base URL (defaults to https://api.clinikehr.com) */
+  /** Override the API base URL (defaults to https://api.clinikapi.com) */
   baseUrl?: string;
   /** Request timeout in milliseconds (default: 30000) */
   timeout?: number;
@@ -125,7 +317,7 @@ export class Clinik {
     }
 
     this.apiKey = apiKey;
-    this.baseUrl = (options?.baseUrl || 'https://api.clinikehr.com').replace(/\/+$/, '');
+    this.baseUrl = (options?.baseUrl || 'https://api.clinikapi.com').replace(/\/+$/, '');
     this.timeout = options?.timeout ?? 30_000;
     this.maxRetries = options?.retries ?? 2;
 
@@ -732,6 +924,1104 @@ export class Clinik {
     search: async (params?: DocumentSearchParams): Promise<ApiResponse<PaginatedResponse<Composition>>> => {
       const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
       return this.request<PaginatedResponse<Composition>>('GET', `/v1/documents${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // appointmentResponses
+  // -------------------------------------------------------------------------
+
+  public appointmentResponses = {
+    create: async (data: AppointmentResponseCreateRequest): Promise<ApiResponse<AppointmentResponse>> => {
+      return this.request<AppointmentResponse>('POST', '/v1/appointment-responses', data);
+    },
+    read: async (id: string): Promise<ApiResponse<AppointmentResponse>> => {
+      return this.request<AppointmentResponse>('GET', `/v1/appointment-responses/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: AppointmentResponseUpdateRequest): Promise<ApiResponse<AppointmentResponse>> => {
+      return this.request<AppointmentResponse>('PATCH', `/v1/appointment-responses/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/appointment-responses/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: AppointmentResponseSearchParams): Promise<ApiResponse<PaginatedResponse<AppointmentResponse>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<AppointmentResponse>>('GET', `/v1/appointment-responses${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // tasks
+  // -------------------------------------------------------------------------
+
+  public tasks = {
+    create: async (data: TaskCreateRequest): Promise<ApiResponse<Task>> => {
+      return this.request<Task>('POST', '/v1/tasks', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Task>> => {
+      return this.request<Task>('GET', `/v1/tasks/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: TaskUpdateRequest): Promise<ApiResponse<Task>> => {
+      return this.request<Task>('PATCH', `/v1/tasks/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/tasks/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: TaskSearchParams): Promise<ApiResponse<PaginatedResponse<Task>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Task>>('GET', `/v1/tasks${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // slots
+  // -------------------------------------------------------------------------
+
+  public slots = {
+    create: async (data: SlotCreateRequest): Promise<ApiResponse<Slot>> => {
+      return this.request<Slot>('POST', '/v1/slots', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Slot>> => {
+      return this.request<Slot>('GET', `/v1/slots/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: SlotUpdateRequest): Promise<ApiResponse<Slot>> => {
+      return this.request<Slot>('PATCH', `/v1/slots/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/slots/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: SlotSearchParams): Promise<ApiResponse<PaginatedResponse<Slot>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Slot>>('GET', `/v1/slots${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // organizations
+  // -------------------------------------------------------------------------
+
+  public organizations = {
+    create: async (data: OrganizationCreateRequest): Promise<ApiResponse<Organization>> => {
+      return this.request<Organization>('POST', '/v1/organizations', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Organization>> => {
+      return this.request<Organization>('GET', `/v1/organizations/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: OrganizationUpdateRequest): Promise<ApiResponse<Organization>> => {
+      return this.request<Organization>('PATCH', `/v1/organizations/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/organizations/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: OrganizationSearchParams): Promise<ApiResponse<PaginatedResponse<Organization>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Organization>>('GET', `/v1/organizations${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // accounts
+  // -------------------------------------------------------------------------
+
+  public accounts = {
+    create: async (data: AccountCreateRequest): Promise<ApiResponse<Account>> => {
+      return this.request<Account>('POST', '/v1/accounts', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Account>> => {
+      return this.request<Account>('GET', `/v1/accounts/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: AccountUpdateRequest): Promise<ApiResponse<Account>> => {
+      return this.request<Account>('PATCH', `/v1/accounts/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/accounts/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: AccountSearchParams): Promise<ApiResponse<PaginatedResponse<Account>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Account>>('GET', `/v1/accounts${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // healthcareServices
+  // -------------------------------------------------------------------------
+
+  public healthcareServices = {
+    create: async (data: HealthcareServiceCreateRequest): Promise<ApiResponse<HealthcareService>> => {
+      return this.request<HealthcareService>('POST', '/v1/healthcare-services', data);
+    },
+    read: async (id: string): Promise<ApiResponse<HealthcareService>> => {
+      return this.request<HealthcareService>('GET', `/v1/healthcare-services/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: HealthcareServiceUpdateRequest): Promise<ApiResponse<HealthcareService>> => {
+      return this.request<HealthcareService>('PATCH', `/v1/healthcare-services/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/healthcare-services/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: HealthcareServiceSearchParams): Promise<ApiResponse<PaginatedResponse<HealthcareService>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<HealthcareService>>('GET', `/v1/healthcare-services${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // serviceRequests
+  // -------------------------------------------------------------------------
+
+  public serviceRequests = {
+    create: async (data: ServiceRequestCreateRequest): Promise<ApiResponse<ServiceRequest>> => {
+      return this.request<ServiceRequest>('POST', '/v1/service-requests', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ServiceRequest>> => {
+      return this.request<ServiceRequest>('GET', `/v1/service-requests/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ServiceRequestUpdateRequest): Promise<ApiResponse<ServiceRequest>> => {
+      return this.request<ServiceRequest>('PATCH', `/v1/service-requests/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/service-requests/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ServiceRequestSearchParams): Promise<ApiResponse<PaginatedResponse<ServiceRequest>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ServiceRequest>>('GET', `/v1/service-requests${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // locations
+  // -------------------------------------------------------------------------
+
+  public locations = {
+    create: async (data: LocationCreateRequest): Promise<ApiResponse<Location>> => {
+      return this.request<Location>('POST', '/v1/locations', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Location>> => {
+      return this.request<Location>('GET', `/v1/locations/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: LocationUpdateRequest): Promise<ApiResponse<Location>> => {
+      return this.request<Location>('PATCH', `/v1/locations/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/locations/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: LocationSearchParams): Promise<ApiResponse<PaginatedResponse<Location>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Location>>('GET', `/v1/locations${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // schedules
+  // -------------------------------------------------------------------------
+
+  public schedules = {
+    create: async (data: ScheduleCreateRequest): Promise<ApiResponse<Schedule>> => {
+      return this.request<Schedule>('POST', '/v1/schedules', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Schedule>> => {
+      return this.request<Schedule>('GET', `/v1/schedules/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ScheduleUpdateRequest): Promise<ApiResponse<Schedule>> => {
+      return this.request<Schedule>('PATCH', `/v1/schedules/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/schedules/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ScheduleSearchParams): Promise<ApiResponse<PaginatedResponse<Schedule>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Schedule>>('GET', `/v1/schedules${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // persons
+  // -------------------------------------------------------------------------
+
+  public persons = {
+    create: async (data: PersonCreateRequest): Promise<ApiResponse<Person>> => {
+      return this.request<Person>('POST', '/v1/persons', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Person>> => {
+      return this.request<Person>('GET', `/v1/persons/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: PersonUpdateRequest): Promise<ApiResponse<Person>> => {
+      return this.request<Person>('PATCH', `/v1/persons/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/persons/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: PersonSearchParams): Promise<ApiResponse<PaginatedResponse<Person>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Person>>('GET', `/v1/persons${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // familyHistory (FamilyMemberHistory)
+  // -------------------------------------------------------------------------
+
+  public familyHistory = {
+    create: async (data: FamilyMemberHistoryCreateRequest): Promise<ApiResponse<FamilyMemberHistory>> => {
+      return this.request<FamilyMemberHistory>('POST', '/v1/family-history', data);
+    },
+    read: async (id: string): Promise<ApiResponse<FamilyMemberHistory>> => {
+      return this.request<FamilyMemberHistory>('GET', `/v1/family-history/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: FamilyMemberHistoryUpdateRequest): Promise<ApiResponse<FamilyMemberHistory>> => {
+      return this.request<FamilyMemberHistory>('PATCH', `/v1/family-history/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/family-history/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: FamilyMemberHistorySearchParams): Promise<ApiResponse<PaginatedResponse<FamilyMemberHistory>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<FamilyMemberHistory>>('GET', `/v1/family-history${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // carePlans
+  // -------------------------------------------------------------------------
+
+  public carePlans = {
+    create: async (data: CarePlanCreateRequest): Promise<ApiResponse<CarePlan>> => {
+      return this.request<CarePlan>('POST', '/v1/care-plans', data);
+    },
+    read: async (id: string): Promise<ApiResponse<CarePlan>> => {
+      return this.request<CarePlan>('GET', `/v1/care-plans/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: CarePlanUpdateRequest): Promise<ApiResponse<CarePlan>> => {
+      return this.request<CarePlan>('PATCH', `/v1/care-plans/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/care-plans/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: CarePlanSearchParams): Promise<ApiResponse<PaginatedResponse<CarePlan>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<CarePlan>>('GET', `/v1/care-plans${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // immunizations
+  // -------------------------------------------------------------------------
+
+  public immunizations = {
+    create: async (data: ImmunizationCreateRequest): Promise<ApiResponse<Immunization>> => {
+      return this.request<Immunization>('POST', '/v1/immunizations', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Immunization>> => {
+      return this.request<Immunization>('GET', `/v1/immunizations/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ImmunizationUpdateRequest): Promise<ApiResponse<Immunization>> => {
+      return this.request<Immunization>('PATCH', `/v1/immunizations/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/immunizations/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ImmunizationSearchParams): Promise<ApiResponse<PaginatedResponse<Immunization>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Immunization>>('GET', `/v1/immunizations${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // claims
+  // -------------------------------------------------------------------------
+
+  public claims = {
+    create: async (data: ClaimCreateRequest): Promise<ApiResponse<Claim>> => {
+      return this.request<Claim>('POST', '/v1/claims', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Claim>> => {
+      return this.request<Claim>('GET', `/v1/claims/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ClaimUpdateRequest): Promise<ApiResponse<Claim>> => {
+      return this.request<Claim>('PATCH', `/v1/claims/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/claims/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ClaimSearchParams): Promise<ApiResponse<PaginatedResponse<Claim>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Claim>>('GET', `/v1/claims${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // claimResponses
+  // -------------------------------------------------------------------------
+
+  public claimResponses = {
+    create: async (data: ClaimResponseCreateRequest): Promise<ApiResponse<ClaimResponse>> => {
+      return this.request<ClaimResponse>('POST', '/v1/claim-responses', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ClaimResponse>> => {
+      return this.request<ClaimResponse>('GET', `/v1/claim-responses/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ClaimResponseUpdateRequest): Promise<ApiResponse<ClaimResponse>> => {
+      return this.request<ClaimResponse>('PATCH', `/v1/claim-responses/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/claim-responses/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ClaimResponseSearchParams): Promise<ApiResponse<PaginatedResponse<ClaimResponse>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ClaimResponse>>('GET', `/v1/claim-responses${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // allergies (AllergyIntolerance)
+  // -------------------------------------------------------------------------
+
+  public allergies = {
+    create: async (data: AllergyIntoleranceCreateRequest): Promise<ApiResponse<AllergyIntolerance>> => {
+      return this.request<AllergyIntolerance>('POST', '/v1/allergies', data);
+    },
+    read: async (id: string): Promise<ApiResponse<AllergyIntolerance>> => {
+      return this.request<AllergyIntolerance>('GET', `/v1/allergies/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: AllergyIntoleranceUpdateRequest): Promise<ApiResponse<AllergyIntolerance>> => {
+      return this.request<AllergyIntolerance>('PATCH', `/v1/allergies/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/allergies/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: AllergyIntoleranceSearchParams): Promise<ApiResponse<PaginatedResponse<AllergyIntolerance>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<AllergyIntolerance>>('GET', `/v1/allergies${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // careTeams (CareTeam)
+  // -------------------------------------------------------------------------
+
+  public careTeams = {
+    create: async (data: CareTeamCreateRequest): Promise<ApiResponse<CareTeam>> => {
+      return this.request<CareTeam>('POST', '/v1/care-teams', data);
+    },
+    read: async (id: string): Promise<ApiResponse<CareTeam>> => {
+      return this.request<CareTeam>('GET', `/v1/care-teams/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: CareTeamUpdateRequest): Promise<ApiResponse<CareTeam>> => {
+      return this.request<CareTeam>('PATCH', `/v1/care-teams/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/care-teams/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: CareTeamSearchParams): Promise<ApiResponse<PaginatedResponse<CareTeam>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<CareTeam>>('GET', `/v1/care-teams${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // conditions (Condition)
+  // -------------------------------------------------------------------------
+
+  public conditions = {
+    create: async (data: ConditionCreateRequest): Promise<ApiResponse<Condition>> => {
+      return this.request<Condition>('POST', '/v1/conditions', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Condition>> => {
+      return this.request<Condition>('GET', `/v1/conditions/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ConditionUpdateRequest): Promise<ApiResponse<Condition>> => {
+      return this.request<Condition>('PATCH', `/v1/conditions/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/conditions/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ConditionSearchParams): Promise<ApiResponse<PaginatedResponse<Condition>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Condition>>('GET', `/v1/conditions${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // chargeItems (ChargeItem)
+  // -------------------------------------------------------------------------
+
+  public chargeItems = {
+    create: async (data: ChargeItemCreateRequest): Promise<ApiResponse<ChargeItem>> => {
+      return this.request<ChargeItem>('POST', '/v1/charge-items', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ChargeItem>> => {
+      return this.request<ChargeItem>('GET', `/v1/charge-items/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ChargeItemUpdateRequest): Promise<ApiResponse<ChargeItem>> => {
+      return this.request<ChargeItem>('PATCH', `/v1/charge-items/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/charge-items/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ChargeItemSearchParams): Promise<ApiResponse<PaginatedResponse<ChargeItem>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ChargeItem>>('GET', `/v1/charge-items${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // coverages (Coverage)
+  // -------------------------------------------------------------------------
+
+  public coverages = {
+    create: async (data: CoverageCreateRequest): Promise<ApiResponse<Coverage>> => {
+      return this.request<Coverage>('POST', '/v1/coverages', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Coverage>> => {
+      return this.request<Coverage>('GET', `/v1/coverages/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: CoverageUpdateRequest): Promise<ApiResponse<Coverage>> => {
+      return this.request<Coverage>('PATCH', `/v1/coverages/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/coverages/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: CoverageSearchParams): Promise<ApiResponse<PaginatedResponse<Coverage>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Coverage>>('GET', `/v1/coverages${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // eligibilityRequests (CoverageEligibilityRequest)
+  // -------------------------------------------------------------------------
+
+  public eligibilityRequests = {
+    create: async (data: EligibilityRequestCreateRequest): Promise<ApiResponse<CoverageEligibilityRequest>> => {
+      return this.request<CoverageEligibilityRequest>('POST', '/v1/eligibility-requests', data);
+    },
+    read: async (id: string): Promise<ApiResponse<CoverageEligibilityRequest>> => {
+      return this.request<CoverageEligibilityRequest>('GET', `/v1/eligibility-requests/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: EligibilityRequestUpdateRequest): Promise<ApiResponse<CoverageEligibilityRequest>> => {
+      return this.request<CoverageEligibilityRequest>('PATCH', `/v1/eligibility-requests/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/eligibility-requests/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: EligibilityRequestSearchParams): Promise<ApiResponse<PaginatedResponse<CoverageEligibilityRequest>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<CoverageEligibilityRequest>>('GET', `/v1/eligibility-requests${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // eligibilityResponses (CoverageEligibilityResponse)
+  // -------------------------------------------------------------------------
+
+  public eligibilityResponses = {
+    create: async (data: EligibilityResponseCreateRequest): Promise<ApiResponse<CoverageEligibilityResponse>> => {
+      return this.request<CoverageEligibilityResponse>('POST', '/v1/eligibility-responses', data);
+    },
+    read: async (id: string): Promise<ApiResponse<CoverageEligibilityResponse>> => {
+      return this.request<CoverageEligibilityResponse>('GET', `/v1/eligibility-responses/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: EligibilityResponseUpdateRequest): Promise<ApiResponse<CoverageEligibilityResponse>> => {
+      return this.request<CoverageEligibilityResponse>('PATCH', `/v1/eligibility-responses/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/eligibility-responses/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: EligibilityResponseSearchParams): Promise<ApiResponse<PaginatedResponse<CoverageEligibilityResponse>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<CoverageEligibilityResponse>>('GET', `/v1/eligibility-responses${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // eobs (ExplanationOfBenefit)
+  // -------------------------------------------------------------------------
+
+  public eobs = {
+    create: async (data: EOBCreateRequest): Promise<ApiResponse<ExplanationOfBenefit>> => {
+      return this.request<ExplanationOfBenefit>('POST', '/v1/eobs', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ExplanationOfBenefit>> => {
+      return this.request<ExplanationOfBenefit>('GET', `/v1/eobs/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: EOBUpdateRequest): Promise<ApiResponse<ExplanationOfBenefit>> => {
+      return this.request<ExplanationOfBenefit>('PATCH', `/v1/eobs/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/eobs/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: EOBSearchParams): Promise<ApiResponse<PaginatedResponse<ExplanationOfBenefit>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ExplanationOfBenefit>>('GET', `/v1/eobs${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // devices (Device)
+  // -------------------------------------------------------------------------
+
+  public devices = {
+    create: async (data: DeviceCreateRequest): Promise<ApiResponse<Device>> => {
+      return this.request<Device>('POST', '/v1/devices', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Device>> => {
+      return this.request<Device>('GET', `/v1/devices/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: DeviceUpdateRequest): Promise<ApiResponse<Device>> => {
+      return this.request<Device>('PATCH', `/v1/devices/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/devices/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: DeviceSearchParams): Promise<ApiResponse<PaginatedResponse<Device>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Device>>('GET', `/v1/devices${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // deviceRequests (DeviceRequest)
+  // -------------------------------------------------------------------------
+
+  public deviceRequests = {
+    create: async (data: DeviceRequestCreateRequest): Promise<ApiResponse<DeviceRequest>> => {
+      return this.request<DeviceRequest>('POST', '/v1/device-requests', data);
+    },
+    read: async (id: string): Promise<ApiResponse<DeviceRequest>> => {
+      return this.request<DeviceRequest>('GET', `/v1/device-requests/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: DeviceRequestUpdateRequest): Promise<ApiResponse<DeviceRequest>> => {
+      return this.request<DeviceRequest>('PATCH', `/v1/device-requests/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/device-requests/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: DeviceRequestSearchParams): Promise<ApiResponse<PaginatedResponse<DeviceRequest>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<DeviceRequest>>('GET', `/v1/device-requests${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // deviceUseStatements (DeviceUseStatement)
+  // -------------------------------------------------------------------------
+
+  public deviceUseStatements = {
+    create: async (data: DeviceUseStatementCreateRequest): Promise<ApiResponse<DeviceUseStatement>> => {
+      return this.request<DeviceUseStatement>('POST', '/v1/device-use-statements', data);
+    },
+    read: async (id: string): Promise<ApiResponse<DeviceUseStatement>> => {
+      return this.request<DeviceUseStatement>('GET', `/v1/device-use-statements/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: DeviceUseStatementUpdateRequest): Promise<ApiResponse<DeviceUseStatement>> => {
+      return this.request<DeviceUseStatement>('PATCH', `/v1/device-use-statements/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/device-use-statements/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: DeviceUseStatementSearchParams): Promise<ApiResponse<PaginatedResponse<DeviceUseStatement>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<DeviceUseStatement>>('GET', `/v1/device-use-statements${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // goals (Goal)
+  // -------------------------------------------------------------------------
+
+  public goals = {
+    create: async (data: GoalCreateRequest): Promise<ApiResponse<Goal>> => {
+      return this.request<Goal>('POST', '/v1/goals', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Goal>> => {
+      return this.request<Goal>('GET', `/v1/goals/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: GoalUpdateRequest): Promise<ApiResponse<Goal>> => {
+      return this.request<Goal>('PATCH', `/v1/goals/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/goals/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: GoalSearchParams): Promise<ApiResponse<PaginatedResponse<Goal>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Goal>>('GET', `/v1/goals${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // invoices (Invoice)
+  // -------------------------------------------------------------------------
+
+  public invoices = {
+    create: async (data: InvoiceCreateRequest): Promise<ApiResponse<Invoice>> => {
+      return this.request<Invoice>('POST', '/v1/invoices', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Invoice>> => {
+      return this.request<Invoice>('GET', `/v1/invoices/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: InvoiceUpdateRequest): Promise<ApiResponse<Invoice>> => {
+      return this.request<Invoice>('PATCH', `/v1/invoices/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/invoices/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: InvoiceSearchParams): Promise<ApiResponse<PaginatedResponse<Invoice>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Invoice>>('GET', `/v1/invoices${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // medicationDispenses (MedicationDispense)
+  // -------------------------------------------------------------------------
+
+  public medicationDispenses = {
+    create: async (data: MedicationDispenseCreateRequest): Promise<ApiResponse<MedicationDispense>> => {
+      return this.request<MedicationDispense>('POST', '/v1/medication-dispenses', data);
+    },
+    read: async (id: string): Promise<ApiResponse<MedicationDispense>> => {
+      return this.request<MedicationDispense>('GET', `/v1/medication-dispenses/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: MedicationDispenseUpdateRequest): Promise<ApiResponse<MedicationDispense>> => {
+      return this.request<MedicationDispense>('PATCH', `/v1/medication-dispenses/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/medication-dispenses/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: MedicationDispenseSearchParams): Promise<ApiResponse<PaginatedResponse<MedicationDispense>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<MedicationDispense>>('GET', `/v1/medication-dispenses${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // medicationKnowledge (MedicationKnowledge)
+  // -------------------------------------------------------------------------
+
+  public medicationKnowledge = {
+    create: async (data: MedicationKnowledgeCreateRequest): Promise<ApiResponse<MedicationKnowledge>> => {
+      return this.request<MedicationKnowledge>('POST', '/v1/medication-knowledge', data);
+    },
+    read: async (id: string): Promise<ApiResponse<MedicationKnowledge>> => {
+      return this.request<MedicationKnowledge>('GET', `/v1/medication-knowledge/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: MedicationKnowledgeUpdateRequest): Promise<ApiResponse<MedicationKnowledge>> => {
+      return this.request<MedicationKnowledge>('PATCH', `/v1/medication-knowledge/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/medication-knowledge/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: MedicationKnowledgeSearchParams): Promise<ApiResponse<PaginatedResponse<MedicationKnowledge>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<MedicationKnowledge>>('GET', `/v1/medication-knowledge${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // medicationStatements (MedicationStatement)
+  // -------------------------------------------------------------------------
+
+  public medicationStatements = {
+    create: async (data: MedicationStatementCreateRequest): Promise<ApiResponse<MedicationStatement>> => {
+      return this.request<MedicationStatement>('POST', '/v1/medication-statements', data);
+    },
+    read: async (id: string): Promise<ApiResponse<MedicationStatement>> => {
+      return this.request<MedicationStatement>('GET', `/v1/medication-statements/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: MedicationStatementUpdateRequest): Promise<ApiResponse<MedicationStatement>> => {
+      return this.request<MedicationStatement>('PATCH', `/v1/medication-statements/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/medication-statements/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: MedicationStatementSearchParams): Promise<ApiResponse<PaginatedResponse<MedicationStatement>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<MedicationStatement>>('GET', `/v1/medication-statements${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // paymentNotices (PaymentNotice)
+  // -------------------------------------------------------------------------
+
+  public paymentNotices = {
+    create: async (data: PaymentNoticeCreateRequest): Promise<ApiResponse<PaymentNotice>> => {
+      return this.request<PaymentNotice>('POST', '/v1/payment-notices', data);
+    },
+    read: async (id: string): Promise<ApiResponse<PaymentNotice>> => {
+      return this.request<PaymentNotice>('GET', `/v1/payment-notices/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: PaymentNoticeUpdateRequest): Promise<ApiResponse<PaymentNotice>> => {
+      return this.request<PaymentNotice>('PATCH', `/v1/payment-notices/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/payment-notices/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: PaymentNoticeSearchParams): Promise<ApiResponse<PaginatedResponse<PaymentNotice>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<PaymentNotice>>('GET', `/v1/payment-notices${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // paymentReconciliations (PaymentReconciliation)
+  // -------------------------------------------------------------------------
+
+  public paymentReconciliations = {
+    create: async (data: PaymentReconciliationCreateRequest): Promise<ApiResponse<PaymentReconciliation>> => {
+      return this.request<PaymentReconciliation>('POST', '/v1/payment-reconciliations', data);
+    },
+    read: async (id: string): Promise<ApiResponse<PaymentReconciliation>> => {
+      return this.request<PaymentReconciliation>('GET', `/v1/payment-reconciliations/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: PaymentReconciliationUpdateRequest): Promise<ApiResponse<PaymentReconciliation>> => {
+      return this.request<PaymentReconciliation>('PATCH', `/v1/payment-reconciliations/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/payment-reconciliations/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: PaymentReconciliationSearchParams): Promise<ApiResponse<PaginatedResponse<PaymentReconciliation>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<PaymentReconciliation>>('GET', `/v1/payment-reconciliations${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // specimens (Specimen)
+  // -------------------------------------------------------------------------
+
+  public specimens = {
+    create: async (data: SpecimenCreateRequest): Promise<ApiResponse<Specimen>> => {
+      return this.request<Specimen>('POST', '/v1/specimens', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Specimen>> => {
+      return this.request<Specimen>('GET', `/v1/specimens/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: SpecimenUpdateRequest): Promise<ApiResponse<Specimen>> => {
+      return this.request<Specimen>('PATCH', `/v1/specimens/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/specimens/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: SpecimenSearchParams): Promise<ApiResponse<PaginatedResponse<Specimen>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Specimen>>('GET', `/v1/specimens${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // imagingStudies (ImagingStudy)
+  // -------------------------------------------------------------------------
+
+  public imagingStudies = {
+    create: async (data: ImagingStudyCreateRequest): Promise<ApiResponse<ImagingStudy>> => {
+      return this.request<ImagingStudy>('POST', '/v1/imaging-studies', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ImagingStudy>> => {
+      return this.request<ImagingStudy>('GET', `/v1/imaging-studies/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ImagingStudyUpdateRequest): Promise<ApiResponse<ImagingStudy>> => {
+      return this.request<ImagingStudy>('PATCH', `/v1/imaging-studies/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/imaging-studies/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ImagingStudySearchParams): Promise<ApiResponse<PaginatedResponse<ImagingStudy>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ImagingStudy>>('GET', `/v1/imaging-studies${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // enrollmentRequests (EnrollmentRequest)
+  // -------------------------------------------------------------------------
+
+  public enrollmentRequests = {
+    create: async (data: EnrollmentRequestCreateRequest): Promise<ApiResponse<EnrollmentRequest>> => {
+      return this.request<EnrollmentRequest>('POST', '/v1/enrollment-requests', data);
+    },
+    read: async (id: string): Promise<ApiResponse<EnrollmentRequest>> => {
+      return this.request<EnrollmentRequest>('GET', `/v1/enrollment-requests/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: EnrollmentRequestUpdateRequest): Promise<ApiResponse<EnrollmentRequest>> => {
+      return this.request<EnrollmentRequest>('PATCH', `/v1/enrollment-requests/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/enrollment-requests/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: EnrollmentRequestSearchParams): Promise<ApiResponse<PaginatedResponse<EnrollmentRequest>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<EnrollmentRequest>>('GET', `/v1/enrollment-requests${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // enrollmentResponses (EnrollmentResponse)
+  // -------------------------------------------------------------------------
+
+  public enrollmentResponses = {
+    create: async (data: EnrollmentResponseCreateRequest): Promise<ApiResponse<EnrollmentResponse>> => {
+      return this.request<EnrollmentResponse>('POST', '/v1/enrollment-responses', data);
+    },
+    read: async (id: string): Promise<ApiResponse<EnrollmentResponse>> => {
+      return this.request<EnrollmentResponse>('GET', `/v1/enrollment-responses/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: EnrollmentResponseUpdateRequest): Promise<ApiResponse<EnrollmentResponse>> => {
+      return this.request<EnrollmentResponse>('PATCH', `/v1/enrollment-responses/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/enrollment-responses/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: EnrollmentResponseSearchParams): Promise<ApiResponse<PaginatedResponse<EnrollmentResponse>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<EnrollmentResponse>>('GET', `/v1/enrollment-responses${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // immunizationEvaluations (ImmunizationEvaluation)
+  // -------------------------------------------------------------------------
+
+  public immunizationEvaluations = {
+    create: async (data: ImmunizationEvaluationCreateRequest): Promise<ApiResponse<ImmunizationEvaluation>> => {
+      return this.request<ImmunizationEvaluation>('POST', '/v1/immunization-evaluations', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ImmunizationEvaluation>> => {
+      return this.request<ImmunizationEvaluation>('GET', `/v1/immunization-evaluations/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ImmunizationEvaluationUpdateRequest): Promise<ApiResponse<ImmunizationEvaluation>> => {
+      return this.request<ImmunizationEvaluation>('PATCH', `/v1/immunization-evaluations/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/immunization-evaluations/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ImmunizationEvaluationSearchParams): Promise<ApiResponse<PaginatedResponse<ImmunizationEvaluation>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ImmunizationEvaluation>>('GET', `/v1/immunization-evaluations${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // media (Media)
+  // -------------------------------------------------------------------------
+
+  public media = {
+    create: async (data: MediaCreateRequest): Promise<ApiResponse<Media>> => {
+      return this.request<Media>('POST', '/v1/media', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Media>> => {
+      return this.request<Media>('GET', `/v1/media/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: MediaUpdateRequest): Promise<ApiResponse<Media>> => {
+      return this.request<Media>('PATCH', `/v1/media/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/media/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: MediaSearchParams): Promise<ApiResponse<PaginatedResponse<Media>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Media>>('GET', `/v1/media${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // activityDefinitions (ActivityDefinition)
+  // -------------------------------------------------------------------------
+
+  public activityDefinitions = {
+    create: async (data: ActivityDefinitionCreateRequest): Promise<ApiResponse<ActivityDefinition>> => {
+      return this.request<ActivityDefinition>('POST', '/v1/activity-definitions', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ActivityDefinition>> => {
+      return this.request<ActivityDefinition>('GET', `/v1/activity-definitions/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: ActivityDefinitionUpdateRequest): Promise<ApiResponse<ActivityDefinition>> => {
+      return this.request<ActivityDefinition>('PATCH', `/v1/activity-definitions/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/activity-definitions/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ActivityDefinitionSearchParams): Promise<ApiResponse<PaginatedResponse<ActivityDefinition>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ActivityDefinition>>('GET', `/v1/activity-definitions${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // nutritionOrders (NutritionOrder)
+  // -------------------------------------------------------------------------
+
+  public nutritionOrders = {
+    create: async (data: NutritionOrderCreateRequest): Promise<ApiResponse<NutritionOrder>> => {
+      return this.request<NutritionOrder>('POST', '/v1/nutrition-orders', data);
+    },
+    read: async (id: string): Promise<ApiResponse<NutritionOrder>> => {
+      return this.request<NutritionOrder>('GET', `/v1/nutrition-orders/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: NutritionOrderUpdateRequest): Promise<ApiResponse<NutritionOrder>> => {
+      return this.request<NutritionOrder>('PATCH', `/v1/nutrition-orders/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/nutrition-orders/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: NutritionOrderSearchParams): Promise<ApiResponse<PaginatedResponse<NutritionOrder>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<NutritionOrder>>('GET', `/v1/nutrition-orders${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // planDefinitions (PlanDefinition)
+  // -------------------------------------------------------------------------
+
+  public planDefinitions = {
+    create: async (data: PlanDefinitionCreateRequest): Promise<ApiResponse<PlanDefinition>> => {
+      return this.request<PlanDefinition>('POST', '/v1/plan-definitions', data);
+    },
+    read: async (id: string): Promise<ApiResponse<PlanDefinition>> => {
+      return this.request<PlanDefinition>('GET', `/v1/plan-definitions/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: PlanDefinitionUpdateRequest): Promise<ApiResponse<PlanDefinition>> => {
+      return this.request<PlanDefinition>('PATCH', `/v1/plan-definitions/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/plan-definitions/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: PlanDefinitionSearchParams): Promise<ApiResponse<PaginatedResponse<PlanDefinition>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<PlanDefinition>>('GET', `/v1/plan-definitions${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // visionPrescriptions (VisionPrescription)
+  // -------------------------------------------------------------------------
+
+  public visionPrescriptions = {
+    create: async (data: VisionPrescriptionCreateRequest): Promise<ApiResponse<VisionPrescription>> => {
+      return this.request<VisionPrescription>('POST', '/v1/vision-prescriptions', data);
+    },
+    read: async (id: string): Promise<ApiResponse<VisionPrescription>> => {
+      return this.request<VisionPrescription>('GET', `/v1/vision-prescriptions/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: VisionPrescriptionUpdateRequest): Promise<ApiResponse<VisionPrescription>> => {
+      return this.request<VisionPrescription>('PATCH', `/v1/vision-prescriptions/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/vision-prescriptions/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: VisionPrescriptionSearchParams): Promise<ApiResponse<PaginatedResponse<VisionPrescription>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<VisionPrescription>>('GET', `/v1/vision-prescriptions${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // riskAssessments (RiskAssessment)
+  // -------------------------------------------------------------------------
+
+  public riskAssessments = {
+    create: async (data: RiskAssessmentCreateRequest): Promise<ApiResponse<RiskAssessment>> => {
+      return this.request<RiskAssessment>('POST', '/v1/risk-assessments', data);
+    },
+    read: async (id: string): Promise<ApiResponse<RiskAssessment>> => {
+      return this.request<RiskAssessment>('GET', `/v1/risk-assessments/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: RiskAssessmentUpdateRequest): Promise<ApiResponse<RiskAssessment>> => {
+      return this.request<RiskAssessment>('PATCH', `/v1/risk-assessments/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/risk-assessments/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: RiskAssessmentSearchParams): Promise<ApiResponse<PaginatedResponse<RiskAssessment>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<RiskAssessment>>('GET', `/v1/risk-assessments${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // auditEvents (AuditEvent)
+  // -------------------------------------------------------------------------
+
+  public auditEvents = {
+    create: async (data: AuditEventCreateRequest): Promise<ApiResponse<AuditEvent>> => {
+      return this.request<AuditEvent>('POST', '/v1/audit-events', data);
+    },
+    read: async (id: string): Promise<ApiResponse<AuditEvent>> => {
+      return this.request<AuditEvent>('GET', `/v1/audit-events/${this.sanitizeId(id)}`);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/audit-events/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: AuditEventSearchParams): Promise<ApiResponse<PaginatedResponse<AuditEvent>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<AuditEvent>>('GET', `/v1/audit-events${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // measures (Measure)
+  // -------------------------------------------------------------------------
+
+  public measures = {
+    create: async (data: MeasureCreateRequest): Promise<ApiResponse<Measure>> => {
+      return this.request<Measure>('POST', '/v1/measures', data);
+    },
+    read: async (id: string): Promise<ApiResponse<Measure>> => {
+      return this.request<Measure>('GET', `/v1/measures/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: MeasureUpdateRequest): Promise<ApiResponse<Measure>> => {
+      return this.request<Measure>('PATCH', `/v1/measures/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/measures/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: MeasureSearchParams): Promise<ApiResponse<PaginatedResponse<Measure>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<Measure>>('GET', `/v1/measures${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // measureReports (MeasureReport)
+  // -------------------------------------------------------------------------
+
+  public measureReports = {
+    create: async (data: MeasureReportCreateRequest): Promise<ApiResponse<MeasureReport>> => {
+      return this.request<MeasureReport>('POST', '/v1/measure-reports', data);
+    },
+    read: async (id: string): Promise<ApiResponse<MeasureReport>> => {
+      return this.request<MeasureReport>('GET', `/v1/measure-reports/${this.sanitizeId(id)}`);
+    },
+    update: async (id: string, data: MeasureReportUpdateRequest): Promise<ApiResponse<MeasureReport>> => {
+      return this.request<MeasureReport>('PATCH', `/v1/measure-reports/${this.sanitizeId(id)}`, data);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/measure-reports/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: MeasureReportSearchParams): Promise<ApiResponse<PaginatedResponse<MeasureReport>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<MeasureReport>>('GET', `/v1/measure-reports${qs}`);
+    },
+  };
+
+  // -------------------------------------------------------------------------
+  // immunizationRecommendations (ImmunizationRecommendation)
+  // -------------------------------------------------------------------------
+
+  public immunizationRecommendations = {
+    create: async (data: ImmunizationRecommendationCreateRequest): Promise<ApiResponse<ImmunizationRecommendation>> => {
+      return this.request<ImmunizationRecommendation>('POST', '/v1/immunization-recommendations', data);
+    },
+    read: async (id: string): Promise<ApiResponse<ImmunizationRecommendation>> => {
+      return this.request<ImmunizationRecommendation>('GET', `/v1/immunization-recommendations/${this.sanitizeId(id)}`);
+    },
+    delete: async (id: string): Promise<ApiResponse<void>> => {
+      return this.request<void>('DELETE', `/v1/immunization-recommendations/${this.sanitizeId(id)}`);
+    },
+    search: async (params?: ImmunizationRecommendationSearchParams): Promise<ApiResponse<PaginatedResponse<ImmunizationRecommendation>>> => {
+      const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
+      return this.request<PaginatedResponse<ImmunizationRecommendation>>('GET', `/v1/immunization-recommendations${qs}`);
     },
   };
 }

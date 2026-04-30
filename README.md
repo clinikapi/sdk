@@ -1,6 +1,6 @@
 # @clinikapi/sdk
 
-Server-side TypeScript SDK for the [ClinikAPI](https://clinikapi.com) healthcare infrastructure platform. Build clinical applications with a simple, type-safe API — we handle FHIR R4 transformation, tenant isolation, and HIPAA-compliant storage.
+Server-side TypeScript SDK for the [ClinikAPI](https://clinikapi.com) healthcare infrastructure platform. Build clinical applications with a simple, type-safe API — we handle FHIR R4 transformation, tenant isolation, and HIPAA compliant storage.
 
 ## Install
 
@@ -35,23 +35,72 @@ This SDK authenticates with your secret API key. Never use it in client-side cod
 
 For frontend UI, use [@clinikapi/react](https://www.npmjs.com/package/@clinikapi/react) which communicates through your backend proxy.
 
-## 14 Resource Namespaces
+## 62 Resource Namespaces
+
+Organized by FHIR domain:
 
 ```ts
-clinik.patients            // Patient
-clinik.practitioners       // Practitioner
-clinik.practitionerRoles   // PractitionerRole
-clinik.encounters          // Encounter
-clinik.observations        // Observation
-clinik.medications         // Medication
-clinik.prescriptions       // MedicationRequest
-clinik.appointments        // Appointment
-clinik.intakes             // QuestionnaireResponse
-clinik.consents            // Consent
-clinik.labs                // DiagnosticReport
-clinik.notes               // DocumentReference
-clinik.assessments         // ClinicalImpression
-clinik.documents           // Composition
+// Individuals
+clinik.patients              clinik.practitioners
+clinik.practitionerRoles     clinik.persons
+clinik.familyHistory
+
+// Entities
+clinik.organizations         clinik.locations
+clinik.healthcareServices    clinik.devices
+
+// Clinical — Summary
+clinik.conditions            clinik.allergies
+clinik.assessments
+
+// Clinical — Diagnostics
+clinik.observations          clinik.labs
+clinik.specimens             clinik.imagingStudies
+clinik.media                 clinik.riskAssessments
+
+// Clinical — Medications
+clinik.medications           clinik.prescriptions
+clinik.medicationDispenses   clinik.medicationStatements
+clinik.medicationKnowledge   clinik.immunizations
+clinik.immunizationEvaluations
+clinik.immunizationRecommendations
+clinik.nutritionOrders       clinik.visionPrescriptions
+
+// Clinical — Care Provision
+clinik.encounters            clinik.carePlans
+clinik.careTeams             clinik.goals
+clinik.serviceRequests       clinik.deviceRequests
+clinik.deviceUseStatements   clinik.consents
+
+// Documents and Forms
+clinik.notes                 clinik.documents
+clinik.intakes
+
+// Scheduling
+clinik.appointments          clinik.appointmentResponses
+clinik.schedules             clinik.slots
+
+// Workflow
+clinik.tasks                 clinik.activityDefinitions
+clinik.planDefinitions
+
+// Financial — Billing
+clinik.accounts              clinik.chargeItems
+clinik.invoices
+
+// Financial — Claims
+clinik.claims                clinik.claimResponses
+clinik.eobs                  clinik.paymentNotices
+clinik.paymentReconciliations
+
+// Financial — Insurance
+clinik.coverages             clinik.eligibilityRequests
+clinik.eligibilityResponses  clinik.enrollmentRequests
+clinik.enrollmentResponses
+
+// Quality and Audit
+clinik.measures              clinik.measureReports
+clinik.auditEvents
 ```
 
 Each namespace provides: `create`, `read`, `update`, `delete`, `search`.
@@ -113,7 +162,7 @@ const { data } = await clinik.fhir.request('GET', '/Observation?code=8867-4&_sor
 
 ```ts
 const clinik = new Clinik(process.env.CLINIKAPI_SECRET_KEY!, {
-  baseUrl: 'https://api.clinikehr.com',  // default
+  baseUrl: 'https://api.clinikapi.com',  // default
   timeout: 30000,                         // ms, default: 30s
   retries: 2,                             // auto-retry on 5xx/429, default: 2
 });
@@ -154,3 +203,5 @@ Full docs at [docs.clinikapi.com/sdk](https://docs.clinikapi.com/sdk/installatio
 ## License
 
 MIT
+
+
