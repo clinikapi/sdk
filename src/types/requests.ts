@@ -2530,8 +2530,9 @@ export interface DeviceRequestSearchParams extends PaginationParams {
 // ---------------------------------------------------------------------------
 
 export interface DeviceUseStatementCreateRequest {
-  /** Required — statement status */
-  status: 'active' | 'completed' | 'on-hold' | 'intended' | 'stopped' | 'not-done';
+  /** Required — statement status (FHIR R4 device-statement-status value set;
+   *  'not-done' is NOT in it — HealthLake rejects it) */
+  status: 'active' | 'completed' | 'on-hold' | 'intended' | 'stopped' | 'entered-in-error';
   /** Required — patient ID */
   patientId: string;
   /** Required — device reference */
@@ -2555,7 +2556,7 @@ export interface DeviceUseStatementCreateRequest {
 }
 
 export interface DeviceUseStatementUpdateRequest {
-  status?: 'active' | 'completed' | 'on-hold' | 'intended' | 'stopped' | 'not-done';
+  status?: 'active' | 'completed' | 'on-hold' | 'intended' | 'stopped' | 'entered-in-error';
   note?: string;
 }
 
