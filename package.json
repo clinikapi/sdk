@@ -1,6 +1,6 @@
 {
   "name": "@clinikapi/sdk",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Server-side TypeScript SDK for the ClinikAPI healthcare infrastructure platform. 62 FHIR R4 resource namespaces.",
   "license": "MIT",
   "publishConfig": {
@@ -11,7 +11,16 @@
     "url": "https://github.com/clinikapi/sdk.git"
   },
   "homepage": "https://docs.clinikapi.com/sdk/installation",
-  "keywords": ["clinikapi", "fhir", "healthcare", "ehr", "hipaa", "sdk", "clinical-data", "fhir-r4"],
+  "keywords": [
+    "clinikapi",
+    "fhir",
+    "healthcare",
+    "ehr",
+    "hipaa",
+    "sdk",
+    "clinical-data",
+    "fhir-r4"
+  ],
   "sideEffects": false,
   "type": "module",
   "main": "dist/index.cjs",

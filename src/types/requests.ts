@@ -179,6 +179,50 @@ export interface PatientSearchParams extends PaginationParams {
   active?: boolean;
 }
 
+/**
+ * The simplified patient shape the API returns from `create`, `update`,
+ * `search`, and `read` without `include`.
+ *
+ * ⚠️ This is NOT a FHIR `Patient` — there is no `name[]` or `telecom[]`. The
+ * simplified routes speak simplified JSON in both directions; raw FHIR comes
+ * back only from `read(id, { include })` (a FHIR Bundle) and the `/v1/fhir/*`
+ * passthrough. Reading `patient.name[0]` off one of these is the mistake this
+ * type exists to prevent — use `fullName`.
+ */
+export interface PatientSummary {
+  id: string;
+  /** Ready-to-render display name; empty only when the record carries no name. */
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  prefix?: string;
+  suffix?: string;
+  email?: string;
+  phone?: string;
+  gender?: string;
+  birthDate?: string;
+  active?: boolean;
+  address?: {
+    line?: string[];
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  maritalStatus?: string;
+  photo?: { url?: string; data?: string; contentType?: string };
+  contact?: Array<{
+    relationship?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    email?: string;
+  }>;
+  languages?: Array<{ language: string; preferred?: boolean }>;
+  generalPractitionerId?: string;
+}
+
 /** Destructured patient bundle — the SDK maps a raw FHIR searchset into this shape */
 export interface PatientReadResponse {
   patient: Patient;

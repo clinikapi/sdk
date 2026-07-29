@@ -108,6 +108,7 @@ import type {
   ObservationUpdateRequest,
   PatientCreateRequest,
   PatientReadResponse,
+  PatientSummary,
   PatientSearchParams,
   PatientUpdateRequest,
   PaginatedResponse,
@@ -559,11 +560,24 @@ export class Clinik {
   // -------------------------------------------------------------------------
 
   public patients = {
-    create: async (data: PatientCreateRequest): Promise<ApiResponse<Patient>> => {
-      return this.request<Patient>('POST', '/v1/patients', data);
+    create: async (data: PatientCreateRequest): Promise<ApiResponse<PatientSummary>> => {
+      return this.request<PatientSummary>('POST', '/v1/patients', data);
     },
 
-    read: async (id: string, options?: ReadOptions): Promise<ApiResponse<PatientReadResponse>> => {
+    /**
+     * Read one patient.
+     *
+     * The two call shapes hit genuinely different endpoints, so they return
+     * different things and the overloads say so:
+     *
+     * - `read(id)` → a `PatientSummary`. A true read-by-id: immediately
+     *   consistent, so a patient created a moment ago is already readable.
+     * - `read(id, { include })` → a destructured FHIR bundle. `_revinclude`
+     *   makes this a SEARCH, and HealthLake's search index lags writes by
+     *   ~10s, so a just-created patient can come back empty here. Fall back to
+     *   `read(id)` when that matters.
+     */
+    read: (async (id: string, options?: ReadOptions): Promise<ApiResponse<any>> => {
       const safeId = this.sanitizeId(id);
       const params = new URLSearchParams();
       if (options?.include) {
@@ -575,16 +589,26 @@ export class Clinik {
       }
       const qs = params.toString() ? `?${params.toString()}` : '';
       const response = await this.request<any>('GET', `/v1/patients/${safeId}${qs}`);
+
+      // Without _revinclude the API returns the simplified patient, not a
+      // Bundle — running it through destructurePatientBundle used to yield
+      // `{ patient: undefined }` and silently break every no-include read.
+      if (!qs) {
+        return { data: response.data as PatientSummary, meta: response.meta };
+      }
       return { data: this.destructurePatientBundle(response.data), meta: response.meta };
+    }) as {
+      (id: string): Promise<ApiResponse<PatientSummary>>;
+      (id: string, options: ReadOptions): Promise<ApiResponse<PatientReadResponse>>;
     },
 
-    update: async (id: string, data: PatientUpdateRequest): Promise<ApiResponse<Patient>> => {
-      return this.request<Patient>('PATCH', `/v1/patients/${this.sanitizeId(id)}`, data);
+    update: async (id: string, data: PatientUpdateRequest): Promise<ApiResponse<PatientSummary>> => {
+      return this.request<PatientSummary>('PATCH', `/v1/patients/${this.sanitizeId(id)}`, data);
     },
 
-    search: async (params?: PatientSearchParams): Promise<ApiResponse<PaginatedResponse<Patient>>> => {
+    search: async (params?: PatientSearchParams): Promise<ApiResponse<PaginatedResponse<PatientSummary>>> => {
       const qs = params ? this.buildQuery(params as Record<string, unknown>) : '';
-      return this.request<PaginatedResponse<Patient>>('GET', `/v1/patients${qs}`);
+      return this.request<PaginatedResponse<PatientSummary>>('GET', `/v1/patients${qs}`);
     },
 
     delete: async (id: string): Promise<ApiResponse<void>> => {
