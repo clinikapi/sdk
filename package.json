@@ -1,6 +1,6 @@
 {
   "name": "@clinikapi/sdk",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Server-side TypeScript SDK for the ClinikAPI healthcare infrastructure platform. 62 FHIR R4 resource namespaces.",
   "license": "MIT",
   "publishConfig": {
@@ -13,18 +13,15 @@
   "homepage": "https://docs.clinikapi.com/sdk/installation",
   "keywords": ["clinikapi", "fhir", "healthcare", "ehr", "hipaa", "sdk", "clinical-data", "fhir-r4"],
   "sideEffects": false,
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js"
-    },
-    "./types/*": {
-      "types": "./dist/types/*.d.ts",
-      "import": "./dist/types/*.js"
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -36,12 +33,13 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "lint": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
+    "tsup": "^8.3.5",
     "typescript": "^5.4.0"
   }
 }

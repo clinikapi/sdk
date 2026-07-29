@@ -430,8 +430,23 @@ export class Clinik {
         if (response.status === 204) {
           return { data: undefined as T, meta };
         }
-        const data = await response.json() as T;
-        return { data, meta };
+        const body = await response.json() as unknown;
+        // Every /v1 REST response wraps its payload in an envelope:
+        //   { "data": <resource | { data: [...], hasMore, total? }> }
+        // Unwrap it so ApiResponse.data IS the typed payload (patient objects,
+        // PaginatedResponse lists, read-bundles). The raw FHIR passthrough
+        // (/v1/fhir/*) returns bare FHIR resources — those carry a
+        // resourceType and are passed through untouched, which also protects
+        // FHIR types with a literal `data` field (e.g. Binary).
+        const data =
+          body !== null &&
+          typeof body === 'object' &&
+          !Array.isArray(body) &&
+          'data' in body &&
+          (body as { resourceType?: unknown }).resourceType === undefined
+            ? (body as { data: unknown }).data
+            : body;
+        return { data: data as T, meta };
       } catch (err: any) {
         // Always clear the timer to prevent leaks, even on error paths
         clearTimeout(timer);
