@@ -2373,8 +2373,8 @@ export interface EligibilityResponseCreateRequest {
   patientId: string;
   /** When the response was created (defaults to now) */
   created?: string;
-  /** CoverageEligibilityRequest ID this responds to */
-  requestId?: string;
+  /** Required — the CoverageEligibilityRequest this responds to (FHIR request 1..1) */
+  requestId: string;
   /** Required — queued, complete, error, partial */
   outcome: 'queued' | 'complete' | 'error' | 'partial';
   /** Required — insurer Organization ID */
