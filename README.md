@@ -164,11 +164,29 @@ const { data } = await clinik.fhir.request('GET', '/Observation?code=8867-4&_sor
 const clinik = new Clinik(process.env.CLINIKAPI_SECRET_KEY!, {
   baseUrl: 'https://api.clinikapi.com',  // default
   timeout: 30000,                         // ms, default: 30s
-  retries: 2,                             // auto-retry on 5xx/429, default: 2
+  retries: 2,                             // auto-retry on 5xx and network errors, default: 2
 });
 ```
 
+## Test keys (sandbox)
+
+Keys that start with `clk_test_` use the sandbox:
+
+- **Synthetic data only.** Never put real patient information in the sandbox. Every test-key response carries `X-Sandbox-Notice: synthetic-data-only`.
+- **Clean-up after 90 days.** Sandbox records are removed automatically after 90 days.
+- **60 requests per minute** for all of an organization's test keys together. Past that the API answers `429 RATE_LIMITED` with a `Retry-After` header.
+- **1,000 records per bulk import**, and exports from the sandbox are returned in the response itself and limited to what fits in it.
+- Live keys answer `503 LIVE_STORE_UNAVAILABLE` ("Live data is not available yet; use a test key") until live data opens.
+
+## Rate limits and retries
+
+A `429` is retried automatically, waiting for the `Retry-After` the server sends (never longer than 30 seconds), up to 3 times. This applies to `GET`, `HEAD`, `PUT` and `DELETE` only. A `POST` or `PATCH` is not repeated on its own, because the SDK does not send an idempotency key; handle the error and decide. Monthly-quota 429s (`MONTHLY_QUOTA_EXCEEDED`, `SANDBOX_QUOTA_EXCEEDED`) are never retried: no wait clears them.
+
+If the last answer is still a 429, it is thrown as `ClinikRateLimitError` with the server's `message`, `code`, `requestId` and `retryAfter` (seconds).
+
 ## Error Handling
+
+A key whose project cannot serve requests is refused before anything is counted: `402 PAYMENT_REQUIRED` (billing stopped), `503 PROJECT_PAUSED` or `503 PROJECT_NOT_READY`. A paused project is never retried automatically.
 
 ```ts
 try {
@@ -178,6 +196,14 @@ try {
     console.error(err.issues);  // field-level validation errors
   } else if (err.name === 'ClinikRateLimitError') {
     console.error('Retry after:', err.retryAfter);
+  } else if (err.name === 'ClinikPaymentRequiredError') {
+    console.error('Billing for this project has stopped');  // 402 PAYMENT_REQUIRED
+  } else if (err.name === 'ClinikProjectPausedError') {
+    console.error('This project is paused');  // 503 PROJECT_PAUSED, not retried
+  } else if (err.name === 'ClinikProjectNotReadyError') {
+    console.error('Project is still being set up; try again shortly');  // 503 PROJECT_NOT_READY
+  } else if (err.name === 'ClinikPayloadTooLargeError') {
+    console.error('Body is over the 5 MB limit; send it in smaller parts');  // 413 PAYLOAD_TOO_LARGE
   }
 }
 ```

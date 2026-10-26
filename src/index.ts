@@ -17,6 +17,7 @@ export * from './types/requests';
 export * from './errors';
 
 import type {
+
   Appointment,
   ClinicalImpression,
   Composition,
@@ -269,7 +270,10 @@ import type {
   ImmunizationRecommendationSearchParams,
 } from './types/requests';
 
-import { parseErrorResponse } from './errors';
+import { ClinikProjectPausedError, ClinikRateLimitError, parseErrorResponse } from './errors';
+
+/** R4 resource types with a `patient` search parameter but no `subject` one. */
+const NO_SUBJECT_PARAM = new Set(['Appointment', 'AppointmentResponse', 'AllergyIntolerance', 'Immunization', 'Consent', 'FamilyMemberHistory', 'Coverage', 'Claim', 'ExplanationOfBenefit']);
 
 // ---------------------------------------------------------------------------
 // Client Options
@@ -280,8 +284,27 @@ export interface ClinikOptions {
   baseUrl?: string;
   /** Request timeout in milliseconds (default: 30000) */
   timeout?: number;
-  /** Number of automatic retries on 5xx / network errors (default: 2) */
+  /** Number of automatic retries on 5xx / network errors (default: 2). A 429 has its own budget: see RATE_LIMIT_MAX_RETRIES. */
   retries?: number;
+}
+
+/** A 429 is retried this many times, honouring Retry-After (capped), and only where repeating the request is safe. */
+export const RATE_LIMIT_MAX_RETRIES = 3;
+/** The longest the SDK waits on one Retry-After. */
+export const RATE_LIMIT_MAX_WAIT_MS = 30_000;
+/** 429 codes that no wait will clear (the monthly pool is spent; a bulk allowance resets hourly). */
+const NON_RETRYABLE_429_CODES = new Set(['MONTHLY_QUOTA_EXCEEDED', 'SANDBOX_QUOTA_EXCEEDED', 'BULK_RATE_LIMITED']);
+/**
+ * Methods a refused request may be sent again with. POST is not here: the SDK sends no idempotency key, so a POST is
+ * never repeated automatically (PATCH is a JSON Patch, not idempotent by definition, so it is left out too).
+ */
+const RATE_LIMIT_RETRY_METHODS = new Set(['GET', 'HEAD', 'PUT', 'DELETE']);
+
+/** How long to wait before retrying a 429, in ms: Retry-After capped at 30 s, else a jittered backoff. */
+export function rateLimitWaitMs(retryAfterSeconds: number | undefined, retryNumber: number): number {
+  if (retryAfterSeconds !== undefined) return Math.min(Math.max(0, retryAfterSeconds) * 1000, RATE_LIMIT_MAX_WAIT_MS);
+  const cap = Math.min(1000 * 2 ** retryNumber, RATE_LIMIT_MAX_WAIT_MS);
+  return 500 + Math.floor(Math.random() * cap);
 }
 
 // ---------------------------------------------------------------------------
@@ -391,6 +414,7 @@ export class Clinik {
     const serializedBody = body !== undefined ? this.serializeBody(body) : undefined;
 
     let lastError: Error | undefined;
+    let rateLimitRetries = 0;
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       const controller = new AbortController();
@@ -419,7 +443,21 @@ export class Clinik {
 
         if (!response.ok) {
           const error = await parseErrorResponse(response);
-          if (attempt < this.maxRetries && (response.status >= 500 || response.status === 429)) {
+          // 429: wait for Retry-After and send again, on its own budget (it does not use up `retries`). The final 429
+          // is thrown as a ClinikRateLimitError carrying the server's message, code, request id and retryAfter.
+          if (
+            error instanceof ClinikRateLimitError &&
+            rateLimitRetries < RATE_LIMIT_MAX_RETRIES &&
+            RATE_LIMIT_RETRY_METHODS.has(method.toUpperCase()) &&
+            !NON_RETRYABLE_429_CODES.has(error.code)
+          ) {
+            rateLimitRetries += 1;
+            await new Promise(r => setTimeout(r, rateLimitWaitMs(error.retryAfter, rateLimitRetries)));
+            attempt -= 1; // this attempt did not count
+            continue;
+          }
+          // A paused project stays paused: no wait clears it, so it is not retried.
+          if (attempt < this.maxRetries && response.status >= 500 && !(error instanceof ClinikProjectPausedError)) {
             lastError = error;
             await new Promise(r => setTimeout(r, this.computeBackoff(attempt)));
             continue;
@@ -583,7 +621,9 @@ export class Clinik {
       if (options?.include) {
         options.include.forEach(inc => {
           const safeInc = this.sanitizeInclude(inc);
-          params.append('_revinclude', `${safeInc}:subject`);
+          // Some R4 types link to the patient only through `patient`; asking a conformant server for `<Type>:subject`
+          // on them fails the whole read.
+          if (!NO_SUBJECT_PARAM.has(safeInc)) params.append('_revinclude', `${safeInc}:subject`);
           params.append('_revinclude', `${safeInc}:patient`);
         });
       }

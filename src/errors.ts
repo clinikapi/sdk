@@ -93,17 +93,62 @@ export class ClinikValidationError extends ClinikApiError {
 }
 
 export class ClinikRateLimitError extends ClinikApiError {
+  /** Seconds the server asked us to wait (the Retry-After header), when it sent one. */
   public readonly retryAfter?: number;
 
-  constructor(retryAfter?: number) {
+  constructor(retryAfter?: number, details?: { message?: string; code?: string; requestId?: string }) {
     super({
       status: 429,
-      code: 'RATE_LIMITED',
-      message: 'Rate limit exceeded. Please retry later.',
+      code: details?.code || 'RATE_LIMITED',
+      message: details?.message || 'Rate limit exceeded. Please retry later.',
+      requestId: details?.requestId,
     });
     this.name = 'ClinikRateLimitError';
     this.retryAfter = retryAfter;
   }
+}
+
+/** 413 PAYLOAD_TOO_LARGE: the request body is over the gateway's 5 MB limit. Split it and send it in parts. */
+export class ClinikPayloadTooLargeError extends ClinikApiError {
+  constructor(message = 'Request body exceeds the size limit for this endpoint.', requestId?: string) {
+    super({ status: 413, code: 'PAYLOAD_TOO_LARGE', message, requestId });
+    this.name = 'ClinikPayloadTooLargeError';
+  }
+}
+
+/** 402 PAYMENT_REQUIRED: billing for the project this key belongs to has stopped. Settle billing in the dashboard; retrying does not help. */
+export class ClinikPaymentRequiredError extends ClinikApiError {
+  constructor(message = 'Billing for this project has stopped', requestId?: string) {
+    super({ status: 402, code: 'PAYMENT_REQUIRED', message, requestId });
+    this.name = 'ClinikPaymentRequiredError';
+  }
+}
+
+/** 503 PROJECT_PAUSED: the project is paused. Resume it in the dashboard; retrying does not help. */
+export class ClinikProjectPausedError extends ClinikApiError {
+  constructor(message = 'This project is paused', requestId?: string) {
+    super({ status: 503, code: 'PROJECT_PAUSED', message, requestId });
+    this.name = 'ClinikProjectPausedError';
+  }
+}
+
+/** 503 PROJECT_NOT_READY: the project is still being set up or resized. Retry shortly. */
+export class ClinikProjectNotReadyError extends ClinikApiError {
+  constructor(message = 'This project is not ready yet', requestId?: string) {
+    super({ status: 503, code: 'PROJECT_NOT_READY', message, requestId });
+    this.name = 'ClinikProjectNotReadyError';
+  }
+}
+
+/** Retry-After as seconds: a number of seconds, or an HTTP date. Undefined when absent or unreadable. */
+export function parseRetryAfter(value: string | null | undefined, now: number = Date.now()): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10);
+  const at = Date.parse(trimmed);
+  if (Number.isNaN(at)) return undefined;
+  return Math.max(0, Math.ceil((at - now) / 1000));
 }
 
 /**
@@ -119,10 +164,11 @@ export async function parseErrorResponse(response: Response): Promise<ClinikApiE
   }
 
   const message = body?.message || body?.error || response.statusText;
-  const requestId = response.headers.get('x-request-id') || undefined;
+  const requestId = response.headers.get('x-request-id') || (typeof body?.requestId === 'string' ? body.requestId : undefined);
 
   // Sanitize FHIR OperationOutcome issues to prevent PHI leakage
-  const rawIssues = body?.issue;
+  // The gateway's own validation answer uses `issues`; a FHIR passthrough OperationOutcome uses `issue`.
+  const rawIssues = body?.issue ?? body?.issues;
   const issues = Array.isArray(rawIssues)
     ? rawIssues.map((issue: any) => ({
         ...issue,
@@ -137,10 +183,23 @@ export async function parseErrorResponse(response: Response): Promise<ClinikApiE
       return new ClinikApiError({ status: 404, code: 'NOT_FOUND', message, issues, requestId });
     case 422:
       return new ClinikValidationError(message, issues);
-    case 429: {
-      const retryAfter = response.headers.get('Retry-After');
-      return new ClinikRateLimitError(retryAfter ? parseInt(retryAfter, 10) : undefined);
-    }
+    case 413:
+      return new ClinikPayloadTooLargeError(message || undefined, requestId);
+    case 429:
+      return new ClinikRateLimitError(parseRetryAfter(response.headers.get('Retry-After')), {
+        message: typeof body?.message === 'string' ? body.message : undefined,
+        code: typeof body?.code === 'string' ? body.code : undefined,
+        requestId,
+      });
+    case 402:
+      if (body?.code === 'PAYMENT_REQUIRED') return new ClinikPaymentRequiredError(message || undefined, requestId);
+      break;
+    case 503:
+      if (body?.code === 'PROJECT_PAUSED') return new ClinikProjectPausedError(message || undefined, requestId);
+      if (body?.code === 'PROJECT_NOT_READY') return new ClinikProjectNotReadyError(message || undefined, requestId);
+      break;
+  }
+  switch (response.status) {
     default:
       return new ClinikApiError({
         status: response.status,
