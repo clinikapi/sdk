@@ -284,7 +284,11 @@ export interface ClinikOptions {
   baseUrl?: string;
   /** Request timeout in milliseconds (default: 30000) */
   timeout?: number;
-  /** Number of automatic retries on 5xx / network errors (default: 2). A 429 has its own budget: see RATE_LIMIT_MAX_RETRIES. */
+  /**
+   * Number of automatic retries on 5xx / network errors (default: 2), for requests that are safe to repeat
+   * (GET, HEAD, PUT, DELETE). A create (POST) or partial update (PATCH) is never retried: if it failed after the
+   * server applied it, a retry would apply it twice. A 429 has its own budget: see RATE_LIMIT_MAX_RETRIES.
+   */
   retries?: number;
 }
 
@@ -299,6 +303,19 @@ const NON_RETRYABLE_429_CODES = new Set(['MONTHLY_QUOTA_EXCEEDED', 'SANDBOX_QUOT
  * never repeated automatically (PATCH is a JSON Patch, not idempotent by definition, so it is left out too).
  */
 const RATE_LIMIT_RETRY_METHODS = new Set(['GET', 'HEAD', 'PUT', 'DELETE']);
+
+/** Methods safe to send twice: retried on 5xx and network errors. POST and PATCH are not. */
+export const SERVER_ERROR_RETRY_METHODS = new Set(['GET', 'HEAD', 'PUT', 'DELETE']);
+
+/** 5xx answers that describe a state, not a blip: no wait clears them, so they are not retried. */
+export const NON_RETRYABLE_SERVER_CODES = new Set(['LIVE_STORE_UNAVAILABLE', 'PROJECT_NOT_READY', 'PROJECT_PAUSED']);
+
+/** Whether a failed request may be sent again (exported for tests). */
+export function mayRetryServerError(method: string, status: number | undefined, code: string | undefined): boolean {
+  if (!SERVER_ERROR_RETRY_METHODS.has(method.toUpperCase())) return false;
+  if (status !== undefined && status < 500) return false;
+  return !(code && NON_RETRYABLE_SERVER_CODES.has(code));
+}
 
 /** How long to wait before retrying a 429, in ms: Retry-After capped at 30 s, else a jittered backoff. */
 export function rateLimitWaitMs(retryAfterSeconds: number | undefined, retryNumber: number): number {
@@ -457,7 +474,12 @@ export class Clinik {
             continue;
           }
           // A paused project stays paused: no wait clears it, so it is not retried.
-          if (attempt < this.maxRetries && response.status >= 500 && !(error instanceof ClinikProjectPausedError)) {
+          if (
+            attempt < this.maxRetries &&
+            response.status >= 500 &&
+            !(error instanceof ClinikProjectPausedError) &&
+            mayRetryServerError(method, response.status, (error as { code?: string }).code)
+          ) {
             lastError = error;
             await new Promise(r => setTimeout(r, this.computeBackoff(attempt)));
             continue;
@@ -491,16 +513,21 @@ export class Clinik {
         clearTimeout(timer);
 
         if (err.name === 'AbortError') {
-          lastError = new Error(`ClinikAPI: Request timed out after ${this.timeout}ms`);
+          lastError = new Error(
+            SERVER_ERROR_RETRY_METHODS.has(method.toUpperCase())
+              ? `ClinikAPI: Request timed out after ${this.timeout}ms`
+              : `ClinikAPI: Request timed out after ${this.timeout}ms. It was not retried, because it may already have been applied; check before sending it again.`,
+          );
         } else if (err.name?.startsWith('Clinik')) {
           throw err;
         } else {
           lastError = err;
         }
-        if (attempt < this.maxRetries) {
+        if (attempt < this.maxRetries && mayRetryServerError(method, undefined, undefined)) {
           await new Promise(r => setTimeout(r, this.computeBackoff(attempt)));
           continue;
         }
+        throw lastError;
       }
     }
     throw lastError ?? new Error('ClinikAPI: Unknown error');

@@ -164,7 +164,7 @@ const { data } = await clinik.fhir.request('GET', '/Observation?code=8867-4&_sor
 const clinik = new Clinik(process.env.CLINIKAPI_SECRET_KEY!, {
   baseUrl: 'https://api.clinikapi.com',  // default
   timeout: 30000,                         // ms, default: 30s
-  retries: 2,                             // auto-retry on 5xx and network errors, default: 2
+  retries: 2,                             // retries for GET/HEAD/PUT/DELETE on 5xx, network errors and timeouts, default: 2
 });
 ```
 
@@ -180,7 +180,9 @@ Keys that start with `clk_test_` use the sandbox:
 
 ## Rate limits and retries
 
-A `429` is retried automatically, waiting for the `Retry-After` the server sends (never longer than 30 seconds), up to 3 times. This applies to `GET`, `HEAD`, `PUT` and `DELETE` only. A `POST` or `PATCH` is not repeated on its own, because the SDK does not send an idempotency key; handle the error and decide. Monthly-quota 429s (`MONTHLY_QUOTA_EXCEEDED`, `SANDBOX_QUOTA_EXCEEDED`) are never retried: no wait clears them.
+A `429` is retried automatically, waiting for the `Retry-After` the server sends (never longer than 30 seconds), up to 3 times. This applies to `GET`, `HEAD`, `PUT` and `DELETE` only. A `POST` or `PATCH` is not repeated on its own, because the SDK does not send an idempotency key; handle the error and decide. Quota and bulk-limit 429s (`MONTHLY_QUOTA_EXCEEDED`, `SANDBOX_QUOTA_EXCEEDED` or `BULK_RATE_LIMITED`) are never retried: no wait clears them.
+
+Server errors (5xx), network failures and timeouts are retried the same way, with a jittered backoff, but only for `GET`, `HEAD`, `PUT` and `DELETE`: a `POST` (create) or `PATCH` (update) is never sent twice, since it may already have been applied. `LIVE_STORE_UNAVAILABLE`, `PROJECT_NOT_READY` and `PROJECT_PAUSED` are not retried.
 
 If the last answer is still a 429, it is thrown as `ClinikRateLimitError` with the server's `message`, `code`, `requestId` and `retryAfter` (seconds).
 
